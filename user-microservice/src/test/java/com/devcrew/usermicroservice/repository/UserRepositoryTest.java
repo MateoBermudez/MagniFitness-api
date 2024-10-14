@@ -18,11 +18,12 @@ public class UserRepositoryTest {
 
     @Test
     public void testSaveAndFindUser() {
-        AppUser user = new AppUser("J22", "Doe@Mail", "hashed_password");
+        AppUser user = new AppUser("J123", "Juan@mail", "hashed_password");
+        user.setAppPerson(null);
         userRepository.save(user);
 
-        AppUser foundUser = userRepository.findByEmail("Doe@Mail").orElse(null);
+        AppUser foundUser = userRepository.findByUsername("J123").orElse(null);
         assertNotNull(foundUser);
-        assertEquals("J22", foundUser.getUsername());
+        assertEquals("J123", foundUser.getUsername());
     }
 }

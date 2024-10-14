@@ -24,9 +24,8 @@ public class AppPersonRepositoryTest {
     @Test
     public void testSaveAndFindPerson() {
         LocalDate dob = LocalDate.of(1990, 1, 1);
-        int age = Period.between(dob, LocalDate.now()).getYears();
-        AppUser user = new AppUser("J22", "J@mail.com", "hashed_password", false, null);
-        AppPerson person = new AppPerson("J22", "John", "Doe", LocalDate.of(1990, 1, 1), "Hello", age, user);
+        AppUser user = new AppUser("J22", "J@mail.com", "hashed_password");
+        AppPerson person = new AppPerson("John", "Doe", dob, user);
         user.setAppPerson(person);
 
         //userRepository goes first always because it is a strong entity, and person is dependent on user
@@ -34,11 +33,10 @@ public class AppPersonRepositoryTest {
         personRepository.save(person);
 
         AppUser foundUser = userRepository.findByUsername("J22").orElse(null);
-        AppPerson foundPerson = personRepository.findByUsername("J22").orElse(null);
-        assertNotNull(foundPerson);
         assertNotNull(foundUser);
+        AppPerson foundPerson = personRepository.findById(foundUser.getAppPerson().getId()).orElse(null);
+        assertNotNull(foundPerson);
         assertEquals("John", foundPerson.getName());
         assertEquals("J22", foundUser.getUsername());
-        assertEquals("J22", foundPerson.getUsername());
     }
 }

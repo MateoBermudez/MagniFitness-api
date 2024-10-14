@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
 
 @Entity
 @Table (
@@ -13,7 +17,6 @@ import lombok.NoArgsConstructor;
         schema = "dbo",
         uniqueConstraints = {
                 @UniqueConstraint(name = "email_unique", columnNames = "email"),
-                @UniqueConstraint(name = "password_unique", columnNames = "password")
         }
 )
 @Data
@@ -22,6 +25,18 @@ import lombok.NoArgsConstructor;
 public class AppUser {
 
     @Id
+    @SequenceGenerator(
+            name = "app_user_sequence",
+            sequenceName = "app_user_sequence",
+            allocationSize = 5
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "app_user_sequence"
+    )
+    private Integer id;
+
+
     @Column(name = "username")
     private String username;
 
@@ -38,6 +53,14 @@ public class AppUser {
     @Column(name = "authenticated")
     @NotNull
     private boolean authenticated = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDate createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
 
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore

@@ -41,7 +41,7 @@ public class UserService {
         AppUser user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
-        userRepository.deleteById(user.getUsername());
+        userRepository.deleteById(user.getId());
     }
 
     @Transactional
@@ -69,7 +69,7 @@ public class UserService {
             throw new UserAlreadyExistsException("User already exists");
         }
         user.setUsername(newUsername);
-        userRepository.deleteById(user.getUsername());
+        userRepository.deleteById(user.getId());
         userRepository.save(user);
     }
 

@@ -20,7 +20,16 @@ import java.time.LocalDate;
 public class AppPerson {
 
     @Id
-    private String username;
+    @SequenceGenerator(
+            name = "app_person_sequence",
+            sequenceName = "app_person_sequence",
+            allocationSize = 5
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "app_person_sequence"
+    )
+    private Integer id;
 
     @Column(name = "name")
     @NotNull
@@ -39,12 +48,10 @@ public class AppPerson {
 
     @JsonIgnore
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "username-foreign")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private AppUser appUser;
 
     public AppPerson(String name, String last_name, LocalDate date_of_birth, AppUser appUser) {
-        this.username = appUser.getUsername();
         this.name = name;
         this.last_name = last_name;
         this.date_of_birth = date_of_birth;
