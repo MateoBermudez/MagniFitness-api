@@ -1,11 +1,10 @@
 package com.devcrew.usermicroservice.repository;
 
 import com.devcrew.usermicroservice.model.AppUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,13 +15,18 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @BeforeEach
+    public void setUp() {
+        userRepository.deleteAll();
+    }
+
     @Test
     public void testSaveAndFindUser() {
-        AppUser user = new AppUser("J22", "Doe@Mail", "hashed_password");
+        AppUser user = new AppUser("J123", "Juan@mail", "hashed_password", true, null, null, null);
         userRepository.save(user);
 
-        AppUser foundUser = userRepository.findByEmail("Doe@Mail").orElse(null);
+        AppUser foundUser = userRepository.findByUsername("J123").orElse(null);
         assertNotNull(foundUser);
-        assertEquals("J22", foundUser.getUsername());
+        assertEquals("J123", foundUser.getUsername());
     }
 }
