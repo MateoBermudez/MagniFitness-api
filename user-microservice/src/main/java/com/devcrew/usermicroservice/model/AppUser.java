@@ -1,11 +1,17 @@
 package com.devcrew.usermicroservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
 
 @Entity
 @Table (
@@ -13,7 +19,6 @@ import lombok.NoArgsConstructor;
         schema = "dbo",
         uniqueConstraints = {
                 @UniqueConstraint(name = "email_unique", columnNames = "email"),
-                @UniqueConstraint(name = "password_unique", columnNames = "password")
         }
 )
 @Data
@@ -22,6 +27,18 @@ import lombok.NoArgsConstructor;
 public class AppUser {
 
     @Id
+    @SequenceGenerator(
+            name = "app_user_sequence",
+            sequenceName = "app_user_sequence",
+            allocationSize = 5
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "app_user_sequence"
+    )
+    private Integer id;
+
+
     @Column(name = "username")
     private String username;
 
@@ -39,13 +56,27 @@ public class AppUser {
     @NotNull
     private boolean authenticated = false;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDate createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
+
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
+    @JsonManagedReference
+    @ToString.Exclude
     private AppPerson appPerson;
 
-    public AppUser(String username, String email, String hashed_password) {
+    public AppUser(String username, String email, String hashed_password, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson) {
         this.email = email;
         this.hashed_password = hashed_password;
         this.username = username;
+        this.authenticated = authenticated;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.appPerson = appPerson;
     }
 }
