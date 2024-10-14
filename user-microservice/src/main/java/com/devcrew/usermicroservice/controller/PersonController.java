@@ -1,6 +1,6 @@
 package com.devcrew.usermicroservice.controller;
 
-import com.devcrew.usermicroservice.model.AppPerson;
+import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,24 +19,20 @@ public class PersonController {
     }
 
     @GetMapping(path = "/get-all")
-    public List<AppPerson> getPeople() {
+    public List<PersonDTO> getPeople() {
         return personService.getPeople();
     }
 
     @GetMapping(path = "/info/{username}")
-    public AppPerson getPerson(@PathVariable String username) {
+    public PersonDTO getPerson(@PathVariable String username) {
         return personService.getPerson(username);
     }
 
     //Post gets handled by User Controller, every new User has personal information, that's why its handled there
-    //If a new User is created, a new Person is created as well, here comes a petition directed by the User Controller
-    public void addPerson(AppPerson person) {
-        personService.addNewPerson(person);
-    }
 
     @PutMapping(path = "/update/{username}")
-    public void updatePersonInformation(AppPerson person) {
-        personService.updatePersonInfo(person);
+    public void updatePersonInformation(@RequestBody PersonDTO personDTO, @PathVariable String username) {
+        personService.updatePersonInfo(personDTO, username);
     }
 
     //Deletion gets handled by User Controller. If User with the same Username is deleted, the Person with the same Username will be deleted as well

@@ -1,6 +1,6 @@
 package com.devcrew.usermicroservice.controller;
 
-import com.devcrew.usermicroservice.model.AppUser;
+import com.devcrew.usermicroservice.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.devcrew.usermicroservice.service.UserService;
@@ -13,29 +13,24 @@ public class UserController {
 
     private final UserService userService;
 
-    //Redirects post-requests to PersonController to add a new person
-    private final PersonController personController;
-
     @Autowired
-    public UserController(UserService userService, PersonController personController) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.personController = personController;
     }
 
     @GetMapping(path = "/get-all")
-    public List<AppUser> getUsers() {
+    public List<UserDTO> getUsers() {
         return userService.getUsers();
     }
 
     @GetMapping(path = "info/{username}")
-    public AppUser getUser(@PathVariable("username") String username) {
+    public UserDTO getUser(@PathVariable("username") String username) {
         return userService.getUserInfo(username);
     }
 
     @PostMapping(path = "/register")
-    public void registerNewUser(@RequestBody AppUser user) {
+    public void registerNewUser(@RequestBody UserDTO user) {
         userService.addNewUser(user);
-        personController.addPerson(user.getAppPerson());
     }
 
     @DeleteMapping(path = "delete/{username}")

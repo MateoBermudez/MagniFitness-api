@@ -1,7 +1,9 @@
 package com.devcrew.usermicroservice.service;
 
+import com.devcrew.usermicroservice.dto.UserDTO;
 import com.devcrew.usermicroservice.exception.UserAlreadyExistsException;
 import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
+import com.devcrew.usermicroservice.mapper.UserMapper;
 import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,16 +22,20 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<AppUser> getUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getUsers() {
+        return userRepository.findAll().stream().map(UserMapper::toDTO).toList();
     }
 
-    public AppUser getUserInfo(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+    public UserDTO getUserInfo(String username) {
+        AppUser user = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        return UserMapper.toDTO(user);
     }
 
     @Transactional
-    public void addNewUser(AppUser user) {
+    public void addNewUser(UserDTO userDto) {
+        AppUser user = UserMapper.toEntity(userDto);
         if (userRepository.findByUsername(user.getUsername()).isPresent() || userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
@@ -41,7 +47,7 @@ public class UserService {
         AppUser user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
-        userRepository.deleteById(user.getUsername());
+        userRepository.deleteById(user.getId());
     }
 
     @Transactional
@@ -62,14 +68,13 @@ public class UserService {
         AppUser user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
-        if (user.getUsername().equals(username)) {
+        if (user.getUsername().equals(newUsername)) {
             throw new UserAlreadyExistsException("Same Username");
         }
         if (userRepository.findByUsername(newUsername).isPresent()) {
             throw new UserAlreadyExistsException("User already exists");
         }
         user.setUsername(newUsername);
-        userRepository.deleteById(user.getUsername());
         userRepository.save(user);
     }
 

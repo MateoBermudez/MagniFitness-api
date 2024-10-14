@@ -1,11 +1,13 @@
 package com.devcrew.usermicroservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -20,7 +22,7 @@ import java.time.LocalDate;
 public class AppPerson {
 
     @Id
-    private String username;
+    private Integer id;
 
     @Column(name = "name")
     @NotNull
@@ -38,17 +40,24 @@ public class AppPerson {
     private Integer age;
 
     @JsonIgnore
+    @JsonBackReference
+    @ToString.Exclude
     @OneToOne
     @MapsId
-    @JoinColumn(name = "username-foreign")
+    @JoinColumn(name = "user_id")
     private AppUser appUser;
 
-    public AppPerson(String name, String last_name, LocalDate date_of_birth, AppUser appUser) {
-        this.username = appUser.getUsername();
+    public AppPerson(String name, String last_name, LocalDate date_of_birth, String personalInfo, Integer age, AppUser appUser) {
         this.name = name;
         this.last_name = last_name;
         this.date_of_birth = date_of_birth;
+        this.personalInfo = personalInfo;
+        this.age = age;
         this.appUser = appUser;
+    }
+
+    public Integer getAge() {
+        return LocalDate.now().getYear() - date_of_birth.getYear();
     }
 
 }
