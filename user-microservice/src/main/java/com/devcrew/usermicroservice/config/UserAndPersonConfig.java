@@ -27,26 +27,40 @@ public class UserAndPersonConfig {
             AppUser user1 = new AppUser(
                     "Ma123",
                     "mariam@gmail.com",
-                    "123456"
+                    "123456",
+                    false,
+                    LocalDate.now(),
+                    LocalDate.now(),
+                    null
             );
 
             AppUser user2 = new AppUser(
                     "Al123",
                     "alex@gmail.com",
-                    "P@Ssw0rd!"
+                    "P@Ssw0rd!",
+                    false,
+                    LocalDate.now(),
+                    LocalDate.now(),
+                    null
             );
 
 
             AppPerson person1 = new AppPerson(
                     "Mariam",
                     "Gonzalez",
-                    dob1, user1
+                    dob1,
+                    "Some personal info",
+                    Period.between(dob1, LocalDate.now()).getYears(),
+                    user1
             );
 
             AppPerson person2 = new AppPerson(
                     "Alex",
                     "Gonzalez",
-                    dob2, user2
+                    dob2,
+                    "Some personal info",
+                    Period.between(dob2, LocalDate.now()).getYears(),
+                    user2
             );
 
             user1.setAppPerson(person1);

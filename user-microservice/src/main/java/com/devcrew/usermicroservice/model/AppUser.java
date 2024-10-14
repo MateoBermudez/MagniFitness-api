@@ -1,11 +1,13 @@
 package com.devcrew.usermicroservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -64,11 +66,17 @@ public class AppUser {
 
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
     @JsonIgnore
+    @JsonManagedReference
+    @ToString.Exclude
     private AppPerson appPerson;
 
-    public AppUser(String username, String email, String hashed_password) {
+    public AppUser(String username, String email, String hashed_password, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson) {
         this.email = email;
         this.hashed_password = hashed_password;
         this.username = username;
+        this.authenticated = authenticated;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.appPerson = appPerson;
     }
 }

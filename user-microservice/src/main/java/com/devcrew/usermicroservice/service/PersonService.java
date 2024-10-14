@@ -1,8 +1,12 @@
 package com.devcrew.usermicroservice.service;
 
+import com.devcrew.usermicroservice.dto.PersonDTO;
+import com.devcrew.usermicroservice.exception.BadRequestException;
 import com.devcrew.usermicroservice.exception.UserAlreadyExistsException;
 import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
+import com.devcrew.usermicroservice.mapper.PersonMapper;
 import com.devcrew.usermicroservice.model.AppPerson;
+import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.repository.PersonRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -23,33 +27,48 @@ public class PersonService {
         this.userRepository = userRepository;
     }
     
-    public List<AppPerson> getPeople() {
-        return personRepository.findAll();
+    public List<PersonDTO> getPeople() {
+        return personRepository.findAll().stream().map(PersonMapper::toDTO).toList();
     }
 
-    public AppPerson getPerson(String username) {
+    public PersonDTO getPerson(String username) {
         Integer id = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         ).getId();
-        return personRepository.findById(id).orElse(null);
-    }
-
-    @Transactional
-    public void addNewPerson(AppPerson person) {
-        if (personRepository.findById(person.getId()).isPresent()) {
-            throw new UserAlreadyExistsException("User already exists");
-        }
-        personRepository.save(person);
-    }
-
-    @Transactional
-    public void updatePersonInfo(AppPerson person) {
-        AppPerson personToUpdate = personRepository.findById(person.getId()).orElseThrow(
+        AppPerson person = personRepository.findById(id).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
+        return PersonMapper.toDTO(person);
+    }
+
+    @Transactional
+    public void updatePersonInfo(PersonDTO personDTO, String username) {
+        AppPerson person = PersonMapper.toEntity(personDTO);
+
+        Integer user_id = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ).getId();
+
+        AppUser user = userRepository.findById(user_id).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+
+        AppPerson personToUpdate = personRepository.findById(user_id).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+
+        if (!username.equals(user.getUsername())) {
+            throw new BadRequestException("Information does not match");
+        }
+
         if (personToUpdate.equals(person)) {
             throw new UserAlreadyExistsException("Same Information");
         }
+
+        person.setAppUser(user);
+        person.setId(user_id);
+        person.getAppUser().setId(user_id);
+
         personRepository.save(person);
     }
 }
