@@ -1,0 +1,63 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+  pull_request:
+    branches:
+      - main
+      - develop
+      - feature/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        microservice:
+          - user-microservice
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Start H2 Database
+        run: |
+          docker run --name h2 -d -p 9092:9092 -p 8082:8082 oscarh/tinyh2
+
+      - name: Wait for H2 to be ready
+        run: |
+          sleep 10  # Espera unos segundos para asegurarte de que H2 esté listo
+
+      - name: Build microservice
+        run: |
+          cd ${{ matrix.microservice }}  
+          ./mvnw clean install             
+
+      - name: Run tests
+        run: |
+          cd ${{ matrix.microservice }}  
+          ./mvnw test                    
+
+      - name: Stop H2 Database
+        run: |
+          docker stop h2
+          docker rm h2
