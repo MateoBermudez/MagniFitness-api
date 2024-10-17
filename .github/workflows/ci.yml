@@ -41,7 +41,7 @@ jobs:
 
       - name: Start H2 Database
         run: |
-          docker run --name h2 -d -p 9092:9092 -p 8082:8082 h2database/h2
+          docker run --name h2 -d -p 9092:9092 -p 8082:8082 oscarfonts/h2
 
       - name: Wait for H2 to be ready
         run: |
