@@ -41,11 +41,11 @@ jobs:
 
       - name: Start H2 Database
         run: |
-          docker run --name h2 -d -p 9092:9092 -p 8082:8082 oscarh/tinyh2
+          docker run --name h2 -d -p 9092:9092 -p 8082:8082 h2database/h2
 
       - name: Wait for H2 to be ready
         run: |
-          sleep 10  # Espera unos segundos para asegurarte de que H2 esté listo
+          sleep 10
 
       - name: Build microservice
         run: |
