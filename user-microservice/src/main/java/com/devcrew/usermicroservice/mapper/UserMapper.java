@@ -36,7 +36,8 @@ public class UserMapper {
                 userDTO.isAuthenticated(),
                 userDTO.getUser_created_at(),
                 userDTO.getUser_updated_at(),
-                null
+                null,
+                userDTO.getRole()
         );
 
         if (userDTO.getId() != null) {

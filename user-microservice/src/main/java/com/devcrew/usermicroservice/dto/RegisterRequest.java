@@ -2,18 +2,15 @@ package com.devcrew.usermicroservice.dto;
 
 import com.devcrew.usermicroservice.model.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class UserDTO {
-    private Integer id;
+@AllArgsConstructor
+public class RegisterRequest {
     private String user_name;
     private String mail;
     private String password;

@@ -2,6 +2,7 @@ package com.devcrew.usermicroservice.config;
 
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
+import com.devcrew.usermicroservice.model.Role;
 import com.devcrew.usermicroservice.repository.PersonRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -31,7 +32,7 @@ public class UserAndPersonConfig {
                     false,
                     LocalDate.now(),
                     LocalDate.now(),
-                    null
+                    null, Role.ADMIN
             );
 
             AppUser user2 = new AppUser(
@@ -41,7 +42,7 @@ public class UserAndPersonConfig {
                     false,
                     LocalDate.now(),
                     LocalDate.now(),
-                    null
+                    null, Role.USER
             );
 
 

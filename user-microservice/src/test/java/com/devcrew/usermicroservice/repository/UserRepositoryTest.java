@@ -1,6 +1,7 @@
 package com.devcrew.usermicroservice.repository;
 
 import com.devcrew.usermicroservice.model.AppUser;
+import com.devcrew.usermicroservice.model.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class UserRepositoryTest {
 
     @Test
     public void testSaveAndFindUser() {
-        AppUser user = new AppUser("J123", "Juan@mail", "hashed_password", true, null, null, null);
+        AppUser user = new AppUser("J123", "Juan@mail", "hashed_password", true, null, null, null, Role.USER);
         userRepository.save(user);
 
         AppUser foundUser = userRepository.findByUsername("J123").orElse(null);
