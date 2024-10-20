@@ -3,9 +3,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.mvn
-mvnw
-mvnw.cmd
 .env
 src/main/resources/application.properties
 target

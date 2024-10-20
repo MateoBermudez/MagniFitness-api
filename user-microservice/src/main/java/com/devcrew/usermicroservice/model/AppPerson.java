@@ -24,6 +24,15 @@ import java.time.LocalDate;
 public class AppPerson {
 
     @Id
+    @SequenceGenerator(
+            name = "app_person_sequence",
+            sequenceName = "app_person_sequence",
+            allocationSize = 5
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "app_person_sequence"
+    )
     private Integer id;
 
     @Column(name = "name")
@@ -41,12 +50,10 @@ public class AppPerson {
     @Transient
     private Integer age;
 
-    @JsonIgnore
+    @OneToOne(mappedBy = "appPerson", cascade = CascadeType.ALL)
     @JsonBackReference
+    @JsonIgnore
     @ToString.Exclude
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
     private AppUser appUser;
 
     public AppPerson(String name, String last_name, LocalDate date_of_birth, String personalInfo, Integer age, AppUser appUser) {

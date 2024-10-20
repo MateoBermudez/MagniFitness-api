@@ -8,11 +8,11 @@ import com.devcrew.usermicroservice.mapper.PersonMapper;
 import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.model.Role;
 import com.devcrew.usermicroservice.repository.UserRepository;
+import com.devcrew.usermicroservice.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +23,22 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUser_name(), request.getPassword()));
+        UserDetails userDetails;
 
-        UserDetails userDetails = userRepository.findByUsername(request.getUser_name())
-                .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+        // Not an email -> Search by username
+        if (!ValidationUtils.isEmailValid(request.getIdentifier())) {
+            userDetails = userRepository.findByUsername(request.getIdentifier())
+                    .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+        }
+        // Email -> Search by email
+        else {
+            userDetails = userRepository.findByEmail(request.getIdentifier())
+                    .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
+        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetails.getUsername(), request.getPassword()));
 
         String token = jwtService.getToken(userDetails);
         return AuthResponse.builder()

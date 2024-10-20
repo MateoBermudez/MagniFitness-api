@@ -16,7 +16,6 @@ public class UserDTO {
     private Integer id;
     private String user_name;
     private String mail;
-    private String password;
     private boolean authenticated;
     private LocalDate user_created_at;
     private LocalDate user_updated_at;

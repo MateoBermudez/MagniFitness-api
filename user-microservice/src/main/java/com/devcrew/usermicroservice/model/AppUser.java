@@ -24,6 +24,7 @@ import java.util.List;
         schema = "dbo",
         uniqueConstraints = {
                 @UniqueConstraint(name = "email_unique", columnNames = "email"),
+                @UniqueConstraint(name = "username_unique", columnNames = "username")
         }
 )
 @Data
@@ -48,6 +49,7 @@ public class AppUser implements UserDetails {
 
 
     @Column(name = "username")
+    @NotNull
     private String username;
 
     @Column(name = "email")
@@ -75,15 +77,15 @@ public class AppUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
-    @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonIgnore
     @JsonManagedReference
     @ToString.Exclude
     private AppPerson appPerson;
 
-    public AppUser(String username, String email, String hashed_password, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role) {
+    public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role) {
         this.email = email;
-        this.hashed_password = hashed_password;
         this.username = username;
         this.authenticated = authenticated;
         this.createdAt = createdAt;

@@ -50,7 +50,6 @@ public class PersonMapper {
         AppUser user = new AppUser(
                 personDTO.getUser().getUser_name(),
                 personDTO.getUser().getMail(),
-                personDTO.getUser().getPassword(),
                 personDTO.getUser().isAuthenticated(),
                 personDTO.getUser().getUser_created_at(),
                 personDTO.getUser().getUser_updated_at(),

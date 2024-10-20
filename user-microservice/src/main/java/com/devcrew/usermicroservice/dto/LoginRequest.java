@@ -10,11 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginRequest {
-    private String user_name;
-
-    // Mail auth not supported yet, just with username
-    private String mail;
-
-
+    private String identifier;
     private String password;
 }
