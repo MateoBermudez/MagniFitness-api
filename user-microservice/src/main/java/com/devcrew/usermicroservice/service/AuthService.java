@@ -4,6 +4,7 @@ import com.devcrew.usermicroservice.dto.AuthResponse;
 import com.devcrew.usermicroservice.dto.LoginRequest;
 import com.devcrew.usermicroservice.dto.RegisterRequest;
 import com.devcrew.usermicroservice.exception.BadCredentialsException;
+import com.devcrew.usermicroservice.exception.UserAlreadyExistsException;
 import com.devcrew.usermicroservice.mapper.PersonMapper;
 import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.model.Role;
@@ -29,7 +30,7 @@ public class AuthService {
         UserDetails userDetails;
 
         // Not an email -> Search by username
-        if (!ValidationUtils.isEmailValid(request.getIdentifier())) {
+        if (!ValidationUtils.isLoginIdEmail(request.getIdentifier())) {
             userDetails = userRepository.findByUsername(request.getIdentifier())
                     .orElseThrow(() -> new BadCredentialsException("Bad credentials"));
         }
@@ -47,10 +48,20 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+        ValidationUtils.isEmailValid(request.getMail());
 
-        if (!ValidationUtils.isEmailValid(request.getMail())) {
-            throw new BadCredentialsException("Invalid email");
+        AppUser userValidation = userRepository.findByUsername(request.getUser_name()).orElse(null);
+
+        if (userValidation != null) {
+            throw new UserAlreadyExistsException("Username already exists");
         }
+
+        userValidation = userRepository.findByEmail(request.getMail()).orElse(null);
+
+        if (userValidation != null) {
+            throw new UserAlreadyExistsException("Email already exists");
+        }
+
 
         AppUser user = AppUser.builder()
                 .username(request.getUser_name())

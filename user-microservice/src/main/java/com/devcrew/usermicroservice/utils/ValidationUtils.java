@@ -1,5 +1,7 @@
 package com.devcrew.usermicroservice.utils;
 
+import com.devcrew.usermicroservice.exception.BadCredentialsException;
+
 public class ValidationUtils {
 
     public static boolean isNullOrEmpty(String str) {
@@ -10,7 +12,13 @@ public class ValidationUtils {
         return obj == null;
     }
 
-    public static boolean isEmailValid(String email) {
-        return email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+    public static void isEmailValid(String email) {
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            throw new BadCredentialsException("Invalid email");
+        }
+    }
+
+    public static boolean isLoginIdEmail(String loginId) {
+        return loginId.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
     }
 }

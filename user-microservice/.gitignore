@@ -34,3 +34,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Docker ###
+user-microservice.tar
+*.tar

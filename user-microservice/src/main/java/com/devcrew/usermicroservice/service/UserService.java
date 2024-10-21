@@ -50,9 +50,7 @@ public class UserService {
 
     @Transactional
     public void updateUserEmail(String username, String email) {
-        if (!ValidationUtils.isEmailValid(email)) {
-            throw new BadRequestException("Invalid email");
-        }
+        ValidationUtils.isEmailValid(email);
 
         AppUser user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
