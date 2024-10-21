@@ -47,6 +47,11 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
+
+        if (!ValidationUtils.isEmailValid(request.getMail())) {
+            throw new BadCredentialsException("Invalid email");
+        }
+
         AppUser user = AppUser.builder()
                 .username(request.getUser_name())
                 .email(request.getMail())

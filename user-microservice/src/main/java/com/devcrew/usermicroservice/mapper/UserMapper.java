@@ -19,6 +19,7 @@ public class UserMapper {
         userDTO.setAuthenticated(appUser.isAuthenticated());
         userDTO.setUser_created_at(appUser.getCreatedAt());
         userDTO.setUser_updated_at(appUser.getUpdatedAt());
+        userDTO.setRole(appUser.getRole());
 
         return userDTO;
     }
