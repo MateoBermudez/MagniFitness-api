@@ -38,3 +38,6 @@ build/
 ### Docker ###
 user-microservice.tar
 *.tar
+
+### Python ###
+myenv
