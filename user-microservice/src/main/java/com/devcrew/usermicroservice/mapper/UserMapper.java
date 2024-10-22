@@ -16,10 +16,10 @@ public class UserMapper {
         userDTO.setId(appUser.getId());
         userDTO.setUser_name(appUser.getUsername());
         userDTO.setMail(appUser.getEmail());
-        userDTO.setPassword(appUser.getHashed_password());
         userDTO.setAuthenticated(appUser.isAuthenticated());
         userDTO.setUser_created_at(appUser.getCreatedAt());
         userDTO.setUser_updated_at(appUser.getUpdatedAt());
+        userDTO.setRole(appUser.getRole());
 
         return userDTO;
     }
@@ -32,11 +32,11 @@ public class UserMapper {
         AppUser user =  new AppUser(
                 userDTO.getUser_name(),
                 userDTO.getMail(),
-                userDTO.getPassword(),
                 userDTO.isAuthenticated(),
                 userDTO.getUser_created_at(),
                 userDTO.getUser_updated_at(),
-                null
+                null,
+                userDTO.getRole()
         );
 
         if (userDTO.getId() != null) {
