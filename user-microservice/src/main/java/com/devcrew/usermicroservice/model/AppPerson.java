@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 
@@ -17,11 +16,23 @@ import java.time.LocalDate;
         schema = "dbo"
 )
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class AppPerson {
 
     @Id
+    @SequenceGenerator(
+            name = "app_person_sequence",
+            sequenceName = "app_person_sequence",
+            allocationSize = 5
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "app_person_sequence"
+    )
     private Integer id;
 
     @Column(name = "name")
@@ -39,12 +50,10 @@ public class AppPerson {
     @Transient
     private Integer age;
 
-    @JsonIgnore
+    @OneToOne(mappedBy = "appPerson", cascade = CascadeType.ALL)
     @JsonBackReference
+    @JsonIgnore
     @ToString.Exclude
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
     private AppUser appUser;
 
     public AppPerson(String name, String last_name, LocalDate date_of_birth, String personalInfo, Integer age, AppUser appUser) {
