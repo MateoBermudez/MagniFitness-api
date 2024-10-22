@@ -3,6 +3,7 @@ package com.devcrew.usermicroservice.mapper;
 import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
+import org.springframework.security.core.userdetails.User;
 
 public class PersonMapper {
 
@@ -49,11 +50,11 @@ public class PersonMapper {
         AppUser user = new AppUser(
                 personDTO.getUser().getUser_name(),
                 personDTO.getUser().getMail(),
-                personDTO.getUser().getPassword(),
                 personDTO.getUser().isAuthenticated(),
                 personDTO.getUser().getUser_created_at(),
                 personDTO.getUser().getUser_updated_at(),
-                person
+                person,
+                personDTO.getUser().getRole()
         );
 
         if (personDTO.getUser().getId() != null) {

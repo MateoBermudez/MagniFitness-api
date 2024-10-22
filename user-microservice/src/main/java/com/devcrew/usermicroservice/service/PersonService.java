@@ -71,4 +71,20 @@ public class PersonService {
 
         personRepository.save(person);
     }
+
+    @Transactional
+    public void addPerson(PersonDTO personDTO) {
+        AppPerson person = PersonMapper.toEntity(personDTO);
+
+        personRepository.save(person);
+    }
+
+    @Transactional
+    public void deletePerson(Integer id) {
+        AppPerson person = personRepository.findById(id).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+
+        personRepository.delete(person);
+    }
 }

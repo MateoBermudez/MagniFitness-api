@@ -1,9 +1,27 @@
 services:
   sqlserver:
-    image: 'mcr.microsoft.com/mssql/server:latest'
+    image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
-      - 'ACCEPT_EULA=yes'
-      - 'MSSQL_PID=express'
-      - 'MSSQL_SA_PASSWORD=verYs3cret'
+      SA_PASSWORD: "P@ssw0rd!"
+      ACCEPT_EULA: "Y"
     ports:
-      - '1433'
+      - "1433:1433"
+    networks:
+      - my_network
+
+  user-microservice:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=master;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: P@ssw0rd!
+    depends_on:
+      - sqlserver
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
