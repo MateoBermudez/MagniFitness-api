@@ -1,5 +1,8 @@
 package com.devcrew.usermicroservice.service;
 
+import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
+import com.devcrew.usermicroservice.model.AppUser;
+import com.devcrew.usermicroservice.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,10 +13,12 @@ import org.springframework.stereotype.Service;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -24,8 +29,16 @@ public class JwtService {
     @Value ("${jwt.expiration}")
     private long EXPIRATION_DATE;
 
+    private final UserRepository userRepository;
+
+    public JwtService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public String getToken(UserDetails user) {
-        return getToken(new HashMap<>(), user);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", getRoleFromUserDetails(user));
+        return getToken(claims, user);
     }
 
     private String getToken(Map<String, Object> extraClaims, UserDetails user) {
@@ -72,5 +85,12 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return getExpirationDateFromToken(token).before(new Date());
+    }
+
+    private String getRoleFromUserDetails(UserDetails userDetails) {
+        AppUser user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(
+                () -> new UserDoesNotExistException("User not found")
+        );
+        return String.valueOf(user.getRole());
     }
 }

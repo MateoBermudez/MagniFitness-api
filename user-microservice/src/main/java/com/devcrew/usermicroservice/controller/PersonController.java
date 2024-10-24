@@ -22,19 +22,19 @@ public class PersonController {
     //Only admin can get all-people information
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/get-all")
-    public List<PersonDTO> getPeople() {
-        return personService.getPeople();
+    public List<PersonDTO> getPeople(@RequestHeader("Authorization") String token) {
+        return personService.getPeople(token);
     }
 
     //User is null, to make user not null, they use the authentication controller -> Register into the system
     //Only admin can get the information of any person, and user can get his own information
     @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @GetMapping(path = "/info/{username}")
-    public PersonDTO getPerson(@PathVariable String username) {
-        return personService.getPerson(username);
+    public PersonDTO getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
+        return personService.getPerson(token, username);
     }
 
-    //Any user can add a new person without any restrictions
+    //Any user can add a new person without any restrictions -> Add restrictions if needed; This endpoint needs revision
     @PostMapping(path = "/add")
     public void addPerson(@RequestBody PersonDTO personDTO) {
         personService.addPerson(personDTO);
@@ -43,14 +43,14 @@ public class PersonController {
     //Only admin can update any person's information, and a user can update their own information
     @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "/update/{username}")
-    public void updatePersonInformation(@RequestBody PersonDTO personDTO, @PathVariable String username) {
-        personService.updatePersonInfo(personDTO, username);
+    public void updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
+        personService.updatePersonInfo(token, personDTO, username);
     }
 
     //Only admin can delete any person
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(path = "/delete/{id}")
-    public void deletePerson(@PathVariable Integer id) {
-        personService.deletePerson(id);
+    public void deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+        personService.deletePerson(token, id);
     }
 }

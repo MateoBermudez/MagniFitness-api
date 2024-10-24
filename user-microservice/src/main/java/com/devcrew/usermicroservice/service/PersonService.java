@@ -2,15 +2,20 @@ package com.devcrew.usermicroservice.service;
 
 import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.exception.BadRequestException;
+import com.devcrew.usermicroservice.exception.ForbiddenException;
 import com.devcrew.usermicroservice.exception.UserAlreadyExistsException;
 import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
 import com.devcrew.usermicroservice.mapper.PersonMapper;
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
+import com.devcrew.usermicroservice.model.Role;
 import com.devcrew.usermicroservice.repository.PersonRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
+import com.devcrew.usermicroservice.utils.JwtValidation;
+import com.devcrew.usermicroservice.utils.ValidationUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,58 +25,40 @@ public class PersonService {
     
     private final PersonRepository personRepository;
     private final UserRepository userRepository;
+    private final JwtValidation jwtValidation;
+
 
     @Autowired
-    public PersonService(PersonRepository personRepository, UserRepository userRepository) {
+    public PersonService(PersonRepository personRepository, UserRepository userRepository, JwtValidation jwtValidation) {
         this.personRepository = personRepository;
         this.userRepository = userRepository;
+        this.jwtValidation = jwtValidation;
     }
     
-    public List<PersonDTO> getPeople() {
+    public List<PersonDTO> getPeople(String token) {
+        ValidateAdmin(token);
         return personRepository.findAll().stream().map(PersonMapper::toDTO).toList();
     }
 
-    public PersonDTO getPerson(String username) {
-        Integer id = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        ).getId();
-        AppPerson person = personRepository.findById(id).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
+    public PersonDTO getPerson(String token, String username) {
+        AppPerson person = ValidateAuthorizationForAdminAndUser(username, token);
         return PersonMapper.toDTO(person);
     }
 
+    //Revise this method -> Can fail due to change in PK and FK in user table
     @Transactional
-    public void updatePersonInfo(PersonDTO personDTO, String username) {
+    public void updatePersonInfo(String token, PersonDTO personDTO, String username) {
+        AppPerson personFromToken = ValidateAuthorizationForAdminAndUser(username, token);
         AppPerson person = PersonMapper.toEntity(personDTO);
 
-        Integer user_id = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        ).getId();
-
-        AppUser user = userRepository.findById(user_id).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-
-        AppPerson personToUpdate = personRepository.findById(user_id).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-
-        if (!username.equals(user.getUsername())) {
-            throw new BadRequestException("Information does not match");
-        }
-
-        if (personToUpdate.equals(person)) {
-            throw new UserAlreadyExistsException("Same Information");
-        }
-
-        person.setAppUser(user);
-        person.setId(user_id);
-        person.getAppUser().setId(user_id);
+        person.setAppUser(personFromToken.getAppUser());
+        person.setId(personFromToken.getId());
+        person.getAppUser().setId(personFromToken.getAppUser().getId());
 
         personRepository.save(person);
     }
 
+    //This needs to be revised
     @Transactional
     public void addPerson(PersonDTO personDTO) {
         AppPerson person = PersonMapper.toEntity(personDTO);
@@ -80,11 +67,33 @@ public class PersonService {
     }
 
     @Transactional
-    public void deletePerson(Integer id) {
+    public void deletePerson(String token, Integer id) {
+        ValidateAdmin(token);
         AppPerson person = personRepository.findById(id).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
 
         personRepository.delete(person);
+    }
+
+    private AppPerson ValidateAuthorizationForAdminAndUser(String username, String token) {
+        String usernameFromToken = jwtValidation.validateUsernameFromToken(token);
+        AppUser user = userRepository.findByUsername(usernameFromToken).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        if (!(user.getRole().equals(Role.ADMIN) || user.getUsername().equals(username))) {
+            throw new ForbiddenException("User does not have permission");
+        }
+        return user.getAppPerson();
+    }
+
+    private void ValidateAdmin(String token) {
+        String username = jwtValidation.validateUsernameFromToken(token);
+        AppUser user = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        if (!user.getRole().equals(Role.ADMIN)) {
+            throw new ForbiddenException("User does not have permission");
+        }
     }
 }

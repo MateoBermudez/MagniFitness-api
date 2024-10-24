@@ -3,7 +3,6 @@ package com.devcrew.usermicroservice.mapper;
 import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
-import org.springframework.security.core.userdetails.User;
 
 public class PersonMapper {
 
