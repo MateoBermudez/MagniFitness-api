@@ -92,22 +92,21 @@ public class UserService {
     }
 
     private AppUser ValidateAuthorizationForAdminAndUser(String username, String token) {
-        String tokenUsername = jwtValidation.validateUsernameFromToken(token);
-        AppUser userFromToken = userRepository.findByUsername(tokenUsername).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-        if (!(userFromToken.getRole().equals(Role.ADMIN) || userFromToken.getUsername().equals(username))) {
+        String roleFromToken = jwtValidation.validateRoleFromToken(token);
+        String usernameFromToken = jwtValidation.validateUsernameFromToken(token);
+
+        if (!(roleFromToken.equals("ADMIN") || usernameFromToken.equals(username))) {
             throw new ForbiddenException("User does not have permission");
         }
-        return userFromToken;
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
     }
 
     private void ValidateAdmin(String token) {
-        String username = jwtValidation.validateUsernameFromToken(token);
-        AppUser user = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-        if (!user.getRole().equals(Role.ADMIN)) {
+        String roleFromToken = jwtValidation.validateRoleFromToken(token);
+
+        if (!roleFromToken.equals("ADMIN")) {
             throw new ForbiddenException("User does not have permission");
         }
     }

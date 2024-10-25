@@ -37,7 +37,7 @@ public class JwtService {
 
     public String getToken(UserDetails user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", getRoleFromUserDetails(user));
+        claims.put("role", getRoleFromUserDetails(user));
         return getToken(claims, user);
     }
 
@@ -66,7 +66,7 @@ public class JwtService {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    private Claims getAllClaimsFromToken(String token) {
+    public Claims getAllClaimsFromToken(String token) {
         return Jwts
                 .parser()
                 .setSigningKey(getKey())

@@ -37,7 +37,7 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @DeleteMapping(path = "delete/{username}")
     public void deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
-        userService.deleteUser(token, username);
+        userService.deleteUser(username, token);
     }
 
     //Only admin can change the email of any user, and user can change his own email

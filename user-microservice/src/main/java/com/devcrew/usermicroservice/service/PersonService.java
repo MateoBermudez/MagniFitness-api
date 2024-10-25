@@ -54,6 +54,7 @@ public class PersonService {
         person.setAppUser(personFromToken.getAppUser());
         person.setId(personFromToken.getId());
         person.getAppUser().setId(personFromToken.getAppUser().getId());
+        person.getAppUser().setAppPerson(person);
 
         personRepository.save(person);
     }
@@ -77,22 +78,21 @@ public class PersonService {
     }
 
     private AppPerson ValidateAuthorizationForAdminAndUser(String username, String token) {
+        String roleFromToken = jwtValidation.validateRoleFromToken(token);
         String usernameFromToken = jwtValidation.validateUsernameFromToken(token);
-        AppUser user = userRepository.findByUsername(usernameFromToken).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-        if (!(user.getRole().equals(Role.ADMIN) || user.getUsername().equals(username))) {
+
+        if (!(roleFromToken.equals("ADMIN") || usernameFromToken.equals(username))) {
             throw new ForbiddenException("User does not have permission");
         }
-        return user.getAppPerson();
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ).getAppPerson();
     }
 
     private void ValidateAdmin(String token) {
-        String username = jwtValidation.validateUsernameFromToken(token);
-        AppUser user = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-        if (!user.getRole().equals(Role.ADMIN)) {
+        String roleFromToken = jwtValidation.validateRoleFromToken(token);
+
+        if (!roleFromToken.equals("ADMIN")) {
             throw new ForbiddenException("User does not have permission");
         }
     }

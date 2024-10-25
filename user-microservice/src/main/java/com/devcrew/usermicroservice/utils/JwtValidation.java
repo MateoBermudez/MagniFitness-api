@@ -4,6 +4,7 @@ import com.devcrew.usermicroservice.exception.BadCredentialsException;
 import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import com.devcrew.usermicroservice.service.JwtService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -31,5 +32,11 @@ public class JwtValidation {
             throw new BadCredentialsException("Invalid token");
         }
         return username;
+    }
+
+    public String validateRoleFromToken(String token) {
+        String tokenFin = token.substring(7); //Remove Bearer from token
+        Claims claims = jwtService.getAllClaimsFromToken(tokenFin);
+        return claims.get("role", String.class);
     }
 }

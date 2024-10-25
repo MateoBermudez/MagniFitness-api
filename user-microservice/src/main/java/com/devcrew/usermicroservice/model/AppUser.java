@@ -81,7 +81,7 @@ public class AppUser implements UserDetails {
     @Column(name = "enabled")
     Boolean enabled = true;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonIgnore
     @JsonManagedReference
