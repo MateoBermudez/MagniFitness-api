@@ -1,13 +1,16 @@
 package com.devcrew.usermicroservice.service;
 
 import com.devcrew.usermicroservice.dto.UserDTO;
-import com.devcrew.usermicroservice.exception.ForbiddenException;
+import com.devcrew.usermicroservice.exception.BadRequestException;
 import com.devcrew.usermicroservice.exception.UserAlreadyExistsException;
 import com.devcrew.usermicroservice.exception.UserDoesNotExistException;
 import com.devcrew.usermicroservice.mapper.UserMapper;
 import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.model.Role;
+import com.devcrew.usermicroservice.repository.RolePermissionRepository;
+import com.devcrew.usermicroservice.repository.RoleRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
+import com.devcrew.usermicroservice.utils.AuthorizationUtils;
 import com.devcrew.usermicroservice.utils.JwtValidation;
 import com.devcrew.usermicroservice.utils.ValidationUtils;
 import jakarta.transaction.Transactional;
@@ -23,91 +26,111 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtValidation jwtValidation;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtValidation jwtValidation) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtValidation jwtValidation, RolePermissionRepository rolePermissionRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtValidation = jwtValidation;
+        this.rolePermissionRepository = rolePermissionRepository;
+        this.roleRepository = roleRepository;
     }
 
     public List<UserDTO> getUsers(String token) {
-        ValidateAdmin(token);
+        validateAdminPermissions(token);
         return userRepository.findAll().stream().map(UserMapper::toDTO).toList();
     }
 
     public UserDTO getUserInfo(String token, String username) {
-        AppUser user = ValidateAuthorizationForAdminAndUser(username, token);
+        AppUser user = validatePermissions(username, token, "READ");
         return UserMapper.toDTO(user);
     }
 
     @Transactional
     public void deleteUser(String username, String token) {
-        AppUser user = ValidateAuthorizationForAdminAndUser(username, token);
-        userRepository.deleteById(user.getId());
+        try {
+            AppUser user = validatePermissions(username, token, "DELETE");
+            userRepository.deleteById(user.getId());
+        } catch (UserDoesNotExistException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     @Transactional
     public void updateUserEmail(String token, String username, String email) {
-        ValidationUtils.isEmailValid(email);
-        AppUser user = ValidateAuthorizationForAdminAndUser(username, token);
-        if (user.getEmail().equals(email)) {
-            throw new UserAlreadyExistsException("Same Email");
+        try {
+            ValidationUtils.isEmailValid(email);
+            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            if (user.getEmail().equals(email)) {
+                throw new UserAlreadyExistsException("Same Email");
+            }
+            user.setEmail(email);
+            userRepository.save(user);
+        } catch (UserAlreadyExistsException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
         }
-        //Authenticate the new email via mail
-        user.setEmail(email);
-        userRepository.save(user);
     }
 
     @Transactional
     public void updateUserUsername(String token, String username, String newUsername) {
-        AppUser user = ValidateAuthorizationForAdminAndUser(username, token);
-        if (user.getUsername().equals(newUsername)) {
-            throw new UserAlreadyExistsException("Same Username");
+        try {
+            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            if (user.getUsername().equals(newUsername)) {
+                throw new UserAlreadyExistsException("Same Username");
+            }
+            if (userRepository.findByUsername(newUsername).isPresent()) {
+                throw new UserAlreadyExistsException("User already exists");
+            }
+            user.setUsername(newUsername);
+            userRepository.save(user);
+        } catch (UserAlreadyExistsException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
         }
-        if (userRepository.findByUsername(newUsername).isPresent()) {
-            throw new UserAlreadyExistsException("User already exists");
-        }
-        user.setUsername(newUsername);
-        userRepository.save(user);
     }
 
     @Transactional
     public void changeUserPassword(String token, String username, String password) {
-        AppUser user = ValidateAuthorizationForAdminAndUser(username, token);
-        //Authenticate the new hashed_password via mail
-
-        user.setHashed_password(passwordEncoder.encode(password));
-        userRepository.save(user);
+        try {
+            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            user.setHashed_password(passwordEncoder.encode(password));
+            userRepository.save(user);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
     @Transactional
     public void changeUserRole(String token, String username, String roleInput) {
-        ValidateAdmin(token);
-        AppUser user = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
-        user.setRole(Role.valueOf(roleInput));
-        userRepository.save(user);
+        try {
+            validatePermissions(username, token, "EDIT, UPDATE");
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new UserDoesNotExistException("User does not exist")
+            );
+            Role role = roleRepository.findByName(roleInput).orElseThrow(
+                    () -> new BadRequestException("Role does not exist")
+            );
+            user.setRole(role);
+            userRepository.save(user);
+        } catch (UserDoesNotExistException | BadRequestException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
     }
 
-    private AppUser ValidateAuthorizationForAdminAndUser(String username, String token) {
-        String roleFromToken = jwtValidation.validateRoleFromToken(token);
-        String usernameFromToken = jwtValidation.validateUsernameFromToken(token);
-
-        if (!(roleFromToken.equals("ADMIN") || usernameFromToken.equals(username))) {
-            throw new ForbiddenException("User does not have permission");
-        }
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new UserDoesNotExistException("User does not exist")
-        );
+    private AppUser validatePermissions(String username, String token, String permissionNeeded) {
+        return AuthorizationUtils.validatePermissions(username, token, permissionNeeded, jwtValidation, userRepository, rolePermissionRepository);
     }
 
-    private void ValidateAdmin(String token) {
-        String roleFromToken = jwtValidation.validateRoleFromToken(token);
-
-        if (!roleFromToken.equals("ADMIN")) {
-            throw new ForbiddenException("User does not have permission");
-        }
+    private void validateAdminPermissions(String token) {
+        AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
     }
 }

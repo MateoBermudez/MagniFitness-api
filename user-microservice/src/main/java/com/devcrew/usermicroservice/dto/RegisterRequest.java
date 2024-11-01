@@ -1,7 +1,6 @@
 package com.devcrew.usermicroservice.dto;
 
 import com.devcrew.usermicroservice.model.Role;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import java.time.LocalDate;

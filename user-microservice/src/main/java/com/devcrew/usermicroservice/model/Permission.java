@@ -1,6 +1,5 @@
 package com.devcrew.usermicroservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,17 +8,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ROLE",
+@Table(name = "PERMISSION",
         schema = "dbo",
         uniqueConstraints = {
-                @UniqueConstraint(name = "role_unique", columnNames = {"name"})
+                @UniqueConstraint(name = "permission_unique", columnNames = {"name"})
         }
 )
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +28,8 @@ public class Role {
     @NotNull
     private String name;
 
-    public Role(String name) {
+    public Permission(String name) {
         this.name = name;
     }
+
 }

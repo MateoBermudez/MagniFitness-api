@@ -13,12 +13,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -26,7 +24,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    @Value ("${jwt.expiration}")
+    @Value("${jwt.expiration}")
     private long EXPIRATION_DATE;
 
     private final UserRepository userRepository;
@@ -36,61 +34,101 @@ public class JwtService {
     }
 
     public String getToken(UserDetails user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", getRoleFromUserDetails(user));
-        return getToken(claims, user);
+        try {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("role", getRoleFromUserDetails(user));
+            return getToken(claims, user);
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating token", e);
+        }
     }
 
     private String getToken(Map<String, Object> extraClaims, UserDetails user) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(user.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_DATE))
-                .signWith(SignatureAlgorithm.HS256, getKey())
-                .compact();
+        try {
+            return Jwts
+                    .builder()
+                    .setClaims(extraClaims)
+                    .setSubject(user.getUsername())
+                    .setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_DATE))
+                    .signWith(SignatureAlgorithm.HS256, getKey())
+                    .compact();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating token with extra claims", e);
+        }
     }
 
     private Key getKey() {
-        byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(keyBytes, "HmacSHA256");
+        try {
+            byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
+            return new SecretKeySpec(keyBytes, "HmacSHA256");
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating key", e);
+        }
     }
 
     public String getUsernameFromToken(String token) {
-        return getClaim(token, Claims::getSubject);
+        try {
+            return getClaim(token, Claims::getSubject);
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving username from token", e);
+        }
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        try {
+            final String username = getUsernameFromToken(token);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (Exception e) {
+            throw new RuntimeException("Error validating token", e);
+        }
     }
 
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts
-                .parser()
-                .setSigningKey(getKey())
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts
+                    .parser()
+                    .setSigningKey(getKey())
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving all claims from token", e);
+        }
     }
 
     public <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
+        try {
+            final Claims claims = getAllClaimsFromToken(token);
+            return claimsResolver.apply(claims);
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving claim from token", e);
+        }
     }
 
     private Date getExpirationDateFromToken(String token) {
-        return getClaim(token, Claims::getExpiration);
+        try {
+            return getClaim(token, Claims::getExpiration);
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving expiration date from token", e);
+        }
     }
 
     private boolean isTokenExpired(String token) {
-        return getExpirationDateFromToken(token).before(new Date());
+        try {
+            return getExpirationDateFromToken(token).before(new Date());
+        } catch (Exception e) {
+            throw new RuntimeException("Error checking if token is expired", e);
+        }
     }
 
     private String getRoleFromUserDetails(UserDetails userDetails) {
-        AppUser user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(
-                () -> new UserDoesNotExistException("User not found")
-        );
-        return String.valueOf(user.getRole());
+        try {
+            AppUser user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(
+                    () -> new UserDoesNotExistException("User not found")
+            );
+            return String.valueOf(user.getRole().getName());
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving role from user details", e);
+        }
     }
 }

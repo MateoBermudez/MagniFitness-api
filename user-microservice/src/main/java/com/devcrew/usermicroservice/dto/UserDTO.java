@@ -1,7 +1,6 @@
 package com.devcrew.usermicroservice.dto;
 
 import com.devcrew.usermicroservice.model.Role;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,4 +21,5 @@ public class UserDTO {
     private Role role;
     @ToString.Exclude
     private PersonDTO person;
+    private String image;
 }

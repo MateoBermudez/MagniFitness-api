@@ -3,6 +3,8 @@ package com.devcrew.usermicroservice.controller;
 import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,35 +24,40 @@ public class PersonController {
     //Only admin can get all-people information
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/get-all")
-    public List<PersonDTO> getPeople(@RequestHeader("Authorization") String token) {
-        return personService.getPeople(token);
+    public ResponseEntity<Object> getPeople(@RequestHeader("Authorization") String token) {
+        List<PersonDTO> people = personService.getPeople(token);
+        return ResponseEntity.ok(people);
     }
 
     //User is null, to make user not null, they use the authentication controller -> Register into the system
     //Only admin can get the information of any person, and user can get his own information
     @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @GetMapping(path = "/info/{username}")
-    public PersonDTO getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
-        return personService.getPerson(token, username);
+    public ResponseEntity<Object> getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
+        PersonDTO person = personService.getPerson(token, username);
+        return ResponseEntity.ok(person);
     }
 
     //Any user can add a new person without any restrictions -> Add restrictions if needed; This endpoint needs revision
     @PostMapping(path = "/add")
-    public void addPerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<Object> addPerson(@RequestBody PersonDTO personDTO) {
         personService.addPerson(personDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     //Only admin can update any person's information, and a user can update their own information
     @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "/update/{username}")
-    public void updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
+    public ResponseEntity<Object> updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
         personService.updatePersonInfo(token, personDTO, username);
+        return ResponseEntity.noContent().build();
     }
 
     //Only admin can delete any person
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(path = "/delete/{id}")
-    public void deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<Object> deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
         personService.deletePerson(token, id);
+        return ResponseEntity.noContent().build();
     }
 }

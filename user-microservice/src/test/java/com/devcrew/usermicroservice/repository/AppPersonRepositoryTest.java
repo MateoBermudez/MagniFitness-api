@@ -33,23 +33,25 @@ public class AppPersonRepositoryTest {
         userRepository.deleteAll();
     }
 
-    @Deprecated
     @Test
     public void testSaveAndFindPerson() {
-//        LocalDate dob = LocalDate.of(1990, 1, 1);
-//        AppUser user = new AppUser("J22", "J@mail.com", "hashed_password", true, null, null, null, Role.ADMIN);
-//        AppPerson person = new AppPerson("John", "Doe", dob, "Some personal info", 31, user);
-//        user.setAppPerson(person);
-//
-//        userRepository.save(user);
-//        personRepository.save(person);
-//
-//        AppUser foundUser = userRepository.findByUsername("J22").orElse(null);
-//        assertNotNull(foundUser);
-//        AppPerson foundPerson = personRepository.findById(foundUser.getAppPerson().getId()).orElse(null);
-//        assertNotNull(foundPerson);
-//        assertEquals("John", foundPerson.getName());
-//        assertEquals("J22", foundUser.getUsername());
+        LocalDate dob = LocalDate.of(1990, 1, 1);
+        Role role = new Role(1, "ADMIN");
+        AppUser user = new AppUser("J22", "J@mail.com", true, null, null, null, role, null);
+        AppPerson person = new AppPerson("John", "Doe", dob, "Some personal info", 31, user);
+        user.setAppPerson(person);
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setHashed_password(passwordEncoder.encode("1234"));
+
+        userRepository.save(user);
+        personRepository.save(person);
+
+        AppUser foundUser = userRepository.findByUsername("J22").orElse(null);
+        assertNotNull(foundUser);
+        AppPerson foundPerson = personRepository.findById(foundUser.getAppPerson().getId()).orElse(null);
+        assertNotNull(foundPerson);
+        assertEquals("John", foundPerson.getName());
+        assertEquals("J22", foundUser.getUsername());
     }
 
     @Test

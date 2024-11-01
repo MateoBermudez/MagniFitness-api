@@ -25,6 +25,10 @@ import java.util.List;
         uniqueConstraints = {
                 @UniqueConstraint(name = "email_unique", columnNames = "email"),
                 @UniqueConstraint(name = "username_unique", columnNames = "username")
+        },
+        indexes= {
+            @Index(name = "idx_username", columnList = "username"),
+            @Index(name = "idx_email", columnList = "email")
         }
 )
 @Data
@@ -62,9 +66,10 @@ public class AppUser implements UserDetails {
 
 //    Two-step verification later
 
+    @Default
     @Column(name = "authenticated")
     @NotNull
-    private boolean authenticated;
+    private boolean authenticated = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -74,21 +79,27 @@ public class AppUser implements UserDetails {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JsonManagedReference
+    @ToString.Exclude
     Role role;
 
     @Default
     @Column(name = "enabled")
     Boolean enabled = true;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonIgnore
     @JsonManagedReference
     @ToString.Exclude
     private AppPerson appPerson;
 
-    public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role) {
+    @Column(name = "image_uri")
+    String imageUri;
+
+    public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role, String imageUri) {
         this.email = email;
         this.username = username;
         this.authenticated = authenticated;
@@ -96,11 +107,12 @@ public class AppUser implements UserDetails {
         this.updatedAt = updatedAt;
         this.appPerson = appPerson;
         this.role = role;
+        this.imageUri = imageUri;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role.getName()));
     }
 
     @Override

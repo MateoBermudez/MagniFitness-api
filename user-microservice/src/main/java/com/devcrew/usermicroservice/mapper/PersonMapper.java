@@ -53,7 +53,8 @@ public class PersonMapper {
                 personDTO.getUser().getUser_created_at(),
                 personDTO.getUser().getUser_updated_at(),
                 person,
-                personDTO.getUser().getRole()
+                personDTO.getUser().getRole(),
+                personDTO.getUser().getImage()
         );
 
         if (personDTO.getUser().getId() != null) {

@@ -1,10 +1,7 @@
 package com.devcrew.usermicroservice.config;
 
-import com.devcrew.usermicroservice.model.AppPerson;
-import com.devcrew.usermicroservice.model.AppUser;
-import com.devcrew.usermicroservice.model.Role;
-import com.devcrew.usermicroservice.repository.PersonRepository;
-import com.devcrew.usermicroservice.repository.UserRepository;
+import com.devcrew.usermicroservice.model.*;
+import com.devcrew.usermicroservice.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +18,53 @@ import static java.time.Month.*;
 public class UserAndPersonConfig {
 
     @Bean
-    CommandLineRunner commandLineRunner(UserRepository userRepository, PersonRepository personRepository) {
+    CommandLineRunner commandLineRunner(UserRepository userRepository, PersonRepository personRepository, RoleRepository roleRepository, PermissionRepository permissionRepository, RolePermissionRepository rolePermissionRepository) {
         return args -> {
             LocalDate dob1 = LocalDate.of(1990, JANUARY, 1);
             LocalDate dob2 = LocalDate.of(1995, JANUARY, 1);
+
+            Role userRole = new Role(1, "USER");
+            Role adminRole = new Role(2, "ADMIN");
+
+            Permission permission1 = new Permission(1, "READ");
+            Permission permission2 = new Permission(2, "WRITE");
+            Permission permission3 = new Permission(3, "DELETE");
+            Permission permission4 = new Permission(4, "EDIT");
+            Permission permission5 = new Permission(5, "ADMIN");
+            Permission permission6 = new Permission(6, "FULL_ACCESS");
+
+            roleRepository.saveAll(
+                    List.of(
+                            userRole,
+                            adminRole
+                    )
+            );
+
+            permissionRepository.saveAll(
+                    List.of(
+                            permission1,
+                            permission2,
+                            permission3,
+                            permission4,
+                            permission5,
+                            permission6
+                    )
+            );
+
+            rolePermissionRepository.saveAll(
+                    List.of(
+                            new RolePermission(userRole, permission1, "READ permission for user"),
+                            new RolePermission(userRole, permission2, "WRITE permission for user"),
+                            new RolePermission(userRole, permission3, "DELETE permission for user"),
+                            new RolePermission(userRole, permission4, "EDIT permission for user"),
+                            new RolePermission(adminRole, permission1, "READ permission for admin"),
+                            new RolePermission(adminRole, permission2, "WRITE permission for admin"),
+                            new RolePermission(adminRole, permission3, "DELETE permission for admin"),
+                            new RolePermission(adminRole, permission4, "EDIT permission for admin"),
+                            new RolePermission(adminRole, permission5, "ADMIN permission for admin"),
+                            new RolePermission(adminRole, permission6, "FULL permission for admin")
+                    )
+            );
 
             AppUser user1 = new AppUser(
                     "Ma123",
@@ -32,7 +72,7 @@ public class UserAndPersonConfig {
                     false,
                     LocalDate.now(),
                     LocalDate.now(),
-                    null, Role.ADMIN
+                    null, adminRole, null
             );
 
             AppUser user2 = new AppUser(
@@ -41,7 +81,7 @@ public class UserAndPersonConfig {
                     false,
                     LocalDate.now(),
                     LocalDate.now(),
-                    null, Role.ADMIN
+                    null, adminRole, null
             );
 
             user1.setHashed_password(new BCryptPasswordEncoder().encode("123"));
