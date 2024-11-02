@@ -4,8 +4,17 @@ import com.devcrew.usermicroservice.dto.PersonDTO;
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
 
+/**
+ * PersonMapper is a class that maps AppPerson objects to PersonDTO objects and vice versa.
+ */
 public class PersonMapper {
 
+    /**
+     * Maps an AppPerson object to a PersonDTO object.
+     *
+     * @param appPerson the AppPerson object to be mapped
+     * @return the PersonDTO object
+     */
     public static PersonDTO toDTO(AppPerson appPerson) {
         if (appPerson == null) {
             return null;
@@ -22,6 +31,13 @@ public class PersonMapper {
         return personDTO;
     }
 
+    /**
+     * Maps a PersonDTO object to an AppPerson object.
+     * If the id is null, it will be ignored.
+     *
+     * @param personDTO the PersonDTO object to be mapped
+     * @return the AppPerson object
+     */
     public static AppPerson toEntity(PersonDTO personDTO) {
         if (personDTO == null) {
             return null;

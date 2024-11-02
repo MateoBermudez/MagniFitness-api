@@ -20,15 +20,48 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
+/**
+ * Service class for managing user-related operations.
+ * All the methods use the AuthorizationUtils class to validate the user's permissions to perform the operation.
+ */
 @Service
 public class UserService {
 
+    /**
+     * User repository for accessing user data.
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Password encoder for encoding passwords.
+     */
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * JWT validation utility.
+     */
     private final JwtValidation jwtValidation;
+
+    /**
+     * Role permission repository for accessing role-permission data.
+     */
     private final RolePermissionRepository rolePermissionRepository;
+
+    /**
+     * Role repository for accessing role data.
+     */
     private final RoleRepository roleRepository;
 
+    /**
+     * Constructor for UserService, injecting necessary dependencies.
+     *
+     * @param userRepository the user repository
+     * @param passwordEncoder the password encoder
+     * @param jwtValidation the JWT validation utility
+     * @param rolePermissionRepository the role permission repository
+     * @param roleRepository the role repository
+     */
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtValidation jwtValidation, RolePermissionRepository rolePermissionRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -38,16 +71,35 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
+    /**
+     * Retrieves a list of all users.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @return a list of UserDTO objects containing the user's information
+     */
     public List<UserDTO> getUsers(String token) {
         validateAdminPermissions(token);
         return userRepository.findAll().stream().map(UserMapper::toDTO).toList();
     }
 
+    /**
+     * Retrieves user information for a specific user.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the username of the user
+     * @return a UserDTO object containing the user information
+     */
     public UserDTO getUserInfo(String token, String username) {
         AppUser user = validatePermissions(username, token, "READ");
         return UserMapper.toDTO(user);
     }
 
+    /**
+     * Deletes a user.
+     *
+     * @param username the username of the user to delete
+     * @param token the JWT token of the user doing the operation
+     */
     @Transactional
     public void deleteUser(String username, String token) {
         try {
@@ -60,6 +112,15 @@ public class UserService {
         }
     }
 
+    /**
+     * Updates the email of a user.
+     * It validates the Email and checks if the new email is the same as the old one.
+     * It also validates the user's permissions to perform the operation.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the username of the user
+     * @param email the new email
+     */
     @Transactional
     public void updateUserEmail(String token, String username, String email) {
         try {
@@ -77,6 +138,15 @@ public class UserService {
         }
     }
 
+    /**
+     * Updates the username of a user.
+     * It validates the user's permissions to perform the operation.
+     * It also checks if the new username is the same as the old one and if the new username already exists.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the current username
+     * @param newUsername the new username
+     */
     @Transactional
     public void updateUserUsername(String token, String username, String newUsername) {
         try {
@@ -96,6 +166,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the password of a user.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the username of the user
+     * @param password the new password
+     */
     @Transactional
     public void changeUserPassword(String token, String username, String password) {
         try {
@@ -107,10 +184,18 @@ public class UserService {
         }
     }
 
+    /**
+     * Changes the role of a user.
+     * Only admins can change the role of a user.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the username of the user
+     * @param roleInput the new role
+     */
     @Transactional
     public void changeUserRole(String token, String username, String roleInput) {
         try {
-            validatePermissions(username, token, "EDIT, UPDATE");
+            validateAdminPermissions(token);
             AppUser user = userRepository.findByUsername(username).orElseThrow(
                     () -> new UserDoesNotExistException("User does not exist")
             );
@@ -126,10 +211,24 @@ public class UserService {
         }
     }
 
+    /**
+     * Validates the permissions of a user
+     * to perform an operation based on the permission needed to perform the operation.
+     *
+     * @param username the username of the user
+     * @param token the JWT token of the user doing the operation
+     * @param permissionNeeded the required permission
+     * @return the AppUser object with the user's information
+     */
     private AppUser validatePermissions(String username, String token, String permissionNeeded) {
         return AuthorizationUtils.validatePermissions(username, token, permissionNeeded, jwtValidation, userRepository, rolePermissionRepository);
     }
 
+    /**
+     * Validates if the user has admin permissions.
+     *
+     * @param token the JWT token of the user doing the operation
+     */
     private void validateAdminPermissions(String token) {
         AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
     }

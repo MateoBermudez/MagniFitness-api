@@ -18,13 +18,31 @@ import org.springframework.http.HttpHeaders;
 
 import java.io.IOException;
 
+/**
+ * Filter class for JWT authentication.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    /**
+     * Service for JWT operations.
+     */
     private final JwtService jwtService;
+
+    /**
+     * Service for user details, used for loading user details from username.
+     */
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Filters incoming requests and performs JWT authentication.
+     *
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param filterChain the filter chain
+     * @throws IOException if an input or output exception occurs
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
         try {
@@ -71,6 +89,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Extracts the JWT token from the request.
+     *
+     * @param request the HTTP request
+     * @return the JWT token, or null if not found
+     * @throws ServletException if an error occurs during token extraction
+     */
     private String getTokenFromRequest(HttpServletRequest request) throws ServletException {
         try {
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

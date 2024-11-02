@@ -1,6 +1,5 @@
 package com.devcrew.usermicroservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Role entity represents a role that a user can have.
+ */
 @Entity
 @Table(name = "ROLE",
         schema = "dbo",
@@ -21,14 +23,25 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Role {
 
+    /**
+     * The unique identifier of the role.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * The name of the role.
+     */
     @Column(name = "name")
     @NotNull
     private String name;
 
+    /**
+     * Constructor with the name of the role.
+     *
+     * @param name the name of the role
+     */
     public Role(String name) {
         this.name = name;
     }

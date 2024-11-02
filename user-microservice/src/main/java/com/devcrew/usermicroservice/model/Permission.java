@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Permission entity represents a permission that a user can have.
+ */
 @Entity
 @Table(name = "PERMISSION",
         schema = "dbo",
@@ -20,14 +23,25 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Permission {
 
+    /**
+     * The unique identifier of the permission.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * The name of the permission.
+     */
     @Column(name = "name")
     @NotNull
     private String name;
 
+    /**
+     * Constructor with the name of the permission.
+     *
+     * @param name the name of the permission
+     */
     public Permission(String name) {
         this.name = name;
     }

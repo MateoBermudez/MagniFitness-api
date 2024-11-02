@@ -17,22 +17,43 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 
+/**
+ * Test class for the AppPersonRepository.
+ */
 @ActiveProfiles("test")
 @SpringBootTest
 public class AppPersonRepositoryTest {
 
+    /**
+     * The person repository to be tested,
+     * it can access the database and perform CRUD operations with the AppPerson entity.
+     */
     @Autowired
     private PersonRepository personRepository;
 
+    /**
+     * The user repository to be tested,
+     * it can access the database and perform CRUD operations with the AppUser entity.
+     */
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Set up the test environment by deleting all the data from the repositories.
+     */
     @BeforeEach
     public void setUp() {
         personRepository.deleteAll();
         userRepository.deleteAll();
     }
 
+    /**
+     * Test the save and find methods of the person and user repositories.
+     * The test creates a user and a person, saves them to the database and then finds the user by its username.
+     * The test checks if the user was found and if the username is correct.
+     * The test checks if the person was found and if the name is correct.
+     * The test checks if the user and person are connected.
+     */
     @Test
     public void testSaveAndFindPerson() {
         LocalDate dob = LocalDate.of(1990, 1, 1);
@@ -54,6 +75,10 @@ public class AppPersonRepositoryTest {
         assertEquals("J22", foundUser.getUsername());
     }
 
+    /**
+     * Test the password encoder to encode and match passwords.
+     * The test encodes a password and then checks if the encoded password matches the raw password.
+     */
     @Test
     public void testPasswordEncoder() {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

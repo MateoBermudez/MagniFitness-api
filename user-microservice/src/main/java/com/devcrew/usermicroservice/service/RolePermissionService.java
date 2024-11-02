@@ -23,15 +23,47 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class for managing a role and permission-related operations.
+ */
 @Service
 public class RolePermissionService {
 
+    /**
+     * RolePermissionRepository object for accessing the role_permission table in the database.
+     */
     private final RolePermissionRepository rolePermissionRepository;
+
+    /**
+     * UserRepository object for accessing the user table in the database.
+     */
     private final UserRepository userRepository;
+
+    /**
+     * JwtValidation object for validating the JWT token.
+     */
     private final JwtValidation jwtValidation;
+
+    /**
+     * RoleRepository object for accessing the role table in the database.
+     */
     private final RoleRepository roleRepository;
+
+    /**
+     * PermissionRepository object for accessing the permission table in the database.
+     */
     private final PermissionRepository permissionRepository;
 
+    /**
+     * Constructor for RolePermissionService,
+     * which initializes the repositories and utilities using the @Autowired annotation.
+     *
+     * @param rolePermissionRepository the role permission repository
+     * @param userRepository the user repository
+     * @param jwtValidation the JWT validation utility
+     * @param roleRepository the role repository
+     * @param permissionRepository the permission repository
+     */
     @Autowired
     public RolePermissionService(RolePermissionRepository rolePermissionRepository, UserRepository userRepository, JwtValidation jwtValidation,
                                  RoleRepository roleRepository, PermissionRepository permissionRepository) {
@@ -42,11 +74,23 @@ public class RolePermissionService {
         this.permissionRepository = permissionRepository;
     }
 
+    /**
+     * Retrieves all role permissions.
+     *
+     * @param token the JWT token of the user requesting the role permissions
+     * @return a list of RolePermissionDTO
+     */
     public List<RolePermissionDTO> getRolePermissions(String token) {
         AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
         return rolePermissionRepository.findAll().stream().map(RolePermissionMapper::toDTO).toList();
     }
 
+    /**
+     * Deletes a role permission.
+     *
+     * @param token the JWT token of the user requesting the deletion
+     * @param id the ID of the role permission to be deleted in the database
+     */
     @Transactional
     public void deleteRolePermission(String token, Integer id) {
         try {
@@ -59,6 +103,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Adds a new role permission.
+     *
+     * @param token the JWT token of the user adding the role permission
+     * @param rolePermission the role permission DTO to be added to the database
+     */
     @Transactional
     public void addRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
@@ -72,6 +122,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Updates an existing role permission.
+     *
+     * @param token the JWT token of the user updating the role permission
+     * @param rolePermission the role permission DTO to be updated in the database
+     */
     @Transactional
     public void updateRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
@@ -91,6 +147,13 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves a role permission by its ID.
+     *
+     * @param token the JWT token of the user requesting the role permission
+     * @param id the ID of the role permission to be retrieved
+     * @return the RolePermissionDTO object with the RolePermission data
+     */
     public RolePermissionDTO getRolePermission(String token, Integer id) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -105,6 +168,13 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves permissions by role.
+     *
+     * @param token the JWT token of the user requesting the permissions
+     * @param roleId the ID of the role to retrieve permissions for
+     * @return a list of PermissionDTO
+     */
     public List<PermissionDTO> getPermissionsByRole(String token, Integer roleId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -117,6 +187,13 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves roles by permission.
+     *
+     * @param token the JWT token of the user requesting the roles
+     * @param permissionId the ID of the permission to retrieve roles for
+     * @return a list of RoleDTO with the roles that have the specified permission
+     */
     public List<RoleDTO> getRolesByPermission(String token, Integer permissionId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -129,6 +206,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves all roles.
+     *
+     * @param token the JWT token of the user requesting the roles
+     * @return a list of RoleDTO with all roles
+     */
     public List<RoleDTO> getRoles(String token) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -140,6 +223,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves all permissions.
+     *
+     * @param token the JWT token of the user requesting the permissions
+     * @return a list of PermissionDTO with all permissions
+     */
     public List<PermissionDTO> getPermissions(String token) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -151,6 +240,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Deletes a role.
+     *
+     * @param token the JWT token of the user requesting the deletion
+     * @param roleId the ID of the role to be deleted in the database
+     */
     @Transactional
     public void deleteRole(String token, Integer roleId) {
         try {
@@ -167,6 +262,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Deletes a permission.
+     *
+     * @param token the JWT token of the user requesting the deletion
+     * @param permissionId the ID of the permission to be deleted in the database
+     */
     @Transactional
     public void deletePermission(String token, Integer permissionId) {
         try {
@@ -183,6 +284,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Adds a new role.
+     *
+     * @param token the JWT token of the user adding the role
+     * @param role the role DTO to be added to the database
+     */
     @Transactional
     public void addRole(String token, RoleDTO role) {
         try {
@@ -196,6 +303,12 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Adds a new permission.
+     *
+     * @param token the JWT token of the user adding the permission
+     * @param permission the permission DTO to be added to the database
+     */
     @Transactional
     public void addPermission(String token, PermissionDTO permission) {
         try {
@@ -209,6 +322,13 @@ public class RolePermissionService {
         }
     }
 
+    //Review this method; it has the potential to throw an exception with the cascade not propagating to RolePermission
+    /**
+     * Updates a role.
+     *
+     * @param token the JWT token of the user updating the role
+     * @param role the role DTO to be updated in the database
+     */
     @Transactional
     public void updateRole(String token, RoleDTO role) {
         try {
@@ -220,6 +340,8 @@ public class RolePermissionService {
             if (roleToUpdate.equals(roleEntity)) {
                 throw new BadRequestException("Data is the same");
             }
+            //Cascade should propagate to RolePermission
+
             roleRepository.save(roleEntity);
         } catch (CustomException ex) {
             throw new CustomException("Error updating role\n" + ex.getMessage());
@@ -228,6 +350,13 @@ public class RolePermissionService {
         }
     }
 
+    //Review this method; it has the potential to throw an exception with the cascade not propagating to RolePermission
+    /**
+     * Updates a permission.
+     *
+     * @param token the JWT token of the user updating the permission
+     * @param permission the permission DTO to be updated in the database
+     */
     @Transactional
     public void updatePermission(String token, PermissionDTO permission) {
         try {
@@ -239,6 +368,8 @@ public class RolePermissionService {
             if (permissionToUpdate.equals(permissionEntity)) {
                 throw new BadRequestException("Data is the same");
             }
+            //Cascade should propagate to RolePermission
+
             permissionRepository.save(permissionEntity);
         } catch (CustomException ex) {
             throw new CustomException("Error updating permission\n" + ex.getMessage());
@@ -247,6 +378,13 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves a role by its ID.
+     *
+     * @param token the JWT token of the user requesting the role
+     * @param roleId the ID of the role to be retrieved
+     * @return the role DTO object with the role data
+     */
     public RoleDTO getRole(String token, Integer roleId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
@@ -261,6 +399,13 @@ public class RolePermissionService {
         }
     }
 
+    /**
+     * Retrieves a permission by its ID.
+     *
+     * @param token the JWT token of the user requesting the permission
+     * @param permissionId the ID of the permission to be retrieved
+     * @return the permission DTO object with the permission data
+     */
     public PermissionDTO getPermission(String token, Integer permissionId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);

@@ -6,8 +6,17 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
+/**
+ * RoleRepository interface extends JpaRepository for CRUD operations with Role entity
+ */
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
+    /**
+     * Method to find Role by name
+     *
+     * @param name Role name
+     * @return Optional Role object
+     */
     @Query("SELECT r FROM Role r WHERE r.name = ?1")
     Optional<Role> findByName(String name);
 }

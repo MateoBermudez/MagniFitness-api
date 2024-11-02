@@ -19,16 +19,44 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for managing authentication operations.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+    /**
+     * User repository that provides access to user data.
+     */
     private final UserRepository userRepository;
+
+    /**
+     * JWT service that provides JWT token operations.
+     */
     private final JwtService jwtService;
+
+    /**
+     * Password encoder that provides password encoding operations.
+     */
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * Authentication manager that provides authentication operations.
+     */
     private final AuthenticationManager authenticationManager;
+
+    /**
+     * Role repository that provides access to role data.
+     */
     private final RoleRepository roleRepository;
 
+    /**
+     * Authenticates a user and generates a JWT token.
+     *
+     * @param request the login request containing the user's credentials
+     * @return an AuthResponse containing the JWT token
+     */
     public AuthResponse login(LoginRequest request) {
         try {
             UserDetails userDetails;
@@ -56,6 +84,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Registers a new user and generates a JWT token.
+     *
+     * @param request the register request containing the user's details
+     * @return an AuthResponse containing the JWT token
+     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         try {

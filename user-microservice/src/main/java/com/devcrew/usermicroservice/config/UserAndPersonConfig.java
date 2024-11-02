@@ -13,10 +13,28 @@ import java.util.List;
 
 import static java.time.Month.*;
 
+/**
+ * UserAndPersonConfig is a configuration class
+ * that sets up the database with some initial data to test the application.
+ */
 //This class is setting up the database with some initial data to test the application
 @Configuration
 public class UserAndPersonConfig {
 
+    /**
+     * Creates a CommandLineRunner bean that runs the application.
+     * It sets up the database with some initial data to test the application.
+     * It creates roles, permissions, users, and persons.
+     * It also assigns roles and permissions to users.
+     * It saves the data to the database.
+     *
+     * @param userRepository the UserRepository instance
+     * @param personRepository the PersonRepository instance
+     * @param roleRepository the RoleRepository instance
+     * @param permissionRepository the PermissionRepository instance
+     * @param rolePermissionRepository the RolePermissionRepository instance
+     * @return the CommandLineRunner instance
+     */
     @Bean
     CommandLineRunner commandLineRunner(UserRepository userRepository, PersonRepository personRepository, RoleRepository roleRepository, PermissionRepository permissionRepository, RolePermissionRepository rolePermissionRepository) {
         return args -> {
