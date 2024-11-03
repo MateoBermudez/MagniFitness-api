@@ -19,6 +19,8 @@ jobs:
     strategy:
       matrix:
         microservice:
+          - eureka-server
+          - api-gateway
           - user-microservice
 
     steps:
