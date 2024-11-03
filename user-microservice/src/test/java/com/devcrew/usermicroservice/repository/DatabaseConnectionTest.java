@@ -13,13 +13,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+/**
+ * Test class for the database connection.
+ */
 @ActiveProfiles("test")
 @SpringBootTest
 public class DatabaseConnectionTest {
 
+    /**
+     * The data source to be tested.
+     */
     @Autowired
     private DataSource dataSource;
 
+    /**
+     * Test the connection to the database.
+     * The test gets a connection from the data source and prints the database name and version.
+     * The test checks if the connection is not null.
+     * @throws SQLException if the connection to the database fails.
+     */
     @Test
     public void testConnection() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
@@ -33,6 +45,11 @@ public class DatabaseConnectionTest {
         }
     }
 
+    /**
+     * Test the selection of tables from the database.
+     * The test gets a connection from the data source and prints the names of the tables in the database.
+     * @throws SQLException if the connection to the database fails.
+     */
     @Test
     public void testSelectTables() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
@@ -46,6 +63,11 @@ public class DatabaseConnectionTest {
         }
     }
 
+    /**
+     * Test the selection of columns from the database.
+     * The test gets a connection from the data source and prints the names and types of the columns in the tables.
+     * @throws SQLException if the connection to the database fails.
+     */
     @Test
     public void testSelectTableInformation() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
