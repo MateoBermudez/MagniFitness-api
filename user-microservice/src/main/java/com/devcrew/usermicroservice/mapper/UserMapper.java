@@ -4,8 +4,17 @@ import com.devcrew.usermicroservice.dto.UserDTO;
 import com.devcrew.usermicroservice.model.AppPerson;
 import com.devcrew.usermicroservice.model.AppUser;
 
+/**
+ * UserMapper is a class that maps AppUser objects to UserDTO objects and vice versa.
+ */
 public class UserMapper {
 
+    /**
+     * Maps an AppUser object to a UserDTO object.
+     *
+     * @param appUser the AppUser object to be mapped
+     * @return the UserDTO object
+     */
     public static UserDTO toDTO(AppUser appUser) {
         if (appUser == null) {
             return null;
@@ -24,6 +33,14 @@ public class UserMapper {
         return userDTO;
     }
 
+
+    /**
+     * Maps a UserDTO object to an AppUser object.
+     * If the id is null, it will be ignored.
+     *
+     * @param userDTO the UserDTO object to be mapped
+     * @return the AppUser object
+     */
     public static AppUser toEntity(UserDTO userDTO) {
         if (userDTO == null) {
             return null;
@@ -36,7 +53,8 @@ public class UserMapper {
                 userDTO.getUser_created_at(),
                 userDTO.getUser_updated_at(),
                 null,
-                userDTO.getRole()
+                userDTO.getRole(),
+                userDTO.getImage()
         );
 
         if (userDTO.getId() != null) {

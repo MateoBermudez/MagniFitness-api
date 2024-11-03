@@ -18,6 +18,9 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Entity class representing a user in the application.
+ */
 @Entity
 @Table (
         name = "APP_USER",
@@ -25,6 +28,10 @@ import java.util.List;
         uniqueConstraints = {
                 @UniqueConstraint(name = "email_unique", columnNames = "email"),
                 @UniqueConstraint(name = "username_unique", columnNames = "username")
+        },
+        indexes= {
+            @Index(name = "idx_username", columnList = "username"),
+            @Index(name = "idx_email", columnList = "email")
         }
 )
 @Data
@@ -35,6 +42,9 @@ import java.util.List;
 @DynamicUpdate
 public class AppUser implements UserDetails {
 
+    /**
+     * The unique identifier of the user.
+     */
     @Id
     @SequenceGenerator(
             name = "app_user_sequence",
@@ -48,43 +58,96 @@ public class AppUser implements UserDetails {
     private Integer id;
 
 
+    /**
+     * The username of the user.
+     */
     @Column(name = "username")
     @NotNull
     private String username;
 
+    /**
+     * The email of the user.
+     */
     @Column(name = "email")
     @NotNull
     private String email;
 
+    /**
+     * The password of the user.
+     */
     @Column(name = "password")
     @NotNull
     private String hashed_password;
 
 //    Two-step verification later
 
+    /**
+     * The authentication status of the user.
+     */
+    @Default
     @Column(name = "authenticated")
     @NotNull
-    private boolean authenticated;
+    private boolean authenticated = false;
 
+    /**
+     * The date the user was created.
+     */
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDate createdAt;
 
+    /**
+     * The date the user was last updated.
+     */
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @Enumerated(EnumType.STRING)
+    /**
+     * The role of the user.
+     */
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JsonManagedReference
+    @ToString.Exclude
     Role role;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    /**
+     * The enabled status of the user.
+     */
+    @Default
+    @Column(name = "enabled")
+    Boolean enabled = true;
+
+    /**
+     * The person associated with the user.
+     */
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonIgnore
     @JsonManagedReference
     @ToString.Exclude
     private AppPerson appPerson;
 
-    public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role) {
+    /**
+     * The image URI of the user. (URL of the image)
+     */
+    @Column(name = "image_uri")
+    String imageUri;
+
+    /**
+     * Constructor with parameters.
+     *
+     * @param username the username of the user
+     * @param email the email of the user
+     * @param authenticated the authentication status of the user
+     * @param createdAt the date the user was created
+     * @param updatedAt the date the user was last updated
+     * @param appPerson the associated AppPerson entity
+     * @param role the role of the user
+     * @param imageUri the image URI of the user
+     */
+    public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role, String imageUri) {
         this.email = email;
         this.username = username;
         this.authenticated = authenticated;
@@ -92,33 +155,64 @@ public class AppUser implements UserDetails {
         this.updatedAt = updatedAt;
         this.appPerson = appPerson;
         this.role = role;
+        this.imageUri = imageUri;
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * Collection of authorities of the user.
+     * @return the role of the user
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role.getName()));
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * Getter for the password of the user.
+     * @return the password of the user
+     */
     @Override
     public String getPassword() {
         return hashed_password;
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * isAccountNonExpired method.
+     * @return true for all users
+     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * isAccountNonLocked method.
+     * @return true for all users
+     */
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * isCredentialsNonExpired method.
+     * @return true for all users
+     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    /**
+     * Overridden method of the UserDetails interface.
+     * isEnabled method.
+     * @return true for all users
+     */
     @Override
     public boolean isEnabled() {
         return true;
