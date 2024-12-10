@@ -22,6 +22,8 @@ jobs:
           - eureka-server
           - api-gateway
           - user-microservice
+          - log-microservice
+
 
     steps:
       - name: Checkout code

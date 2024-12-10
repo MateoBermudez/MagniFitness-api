@@ -146,4 +146,11 @@ public class UserController {
         userService.changeUserRole(token, username, role);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(path = "validate-admin")
+    public ResponseEntity<Object> validateAdmin(@RequestHeader("Authorization") String token) {
+        boolean isAdmin = userService.validateAdmin(token);
+        return ResponseEntity.ok(isAdmin);
+    }
 }

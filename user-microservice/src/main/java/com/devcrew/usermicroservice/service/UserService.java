@@ -229,7 +229,11 @@ public class UserService {
      *
      * @param token the JWT token of the user doing the operation
      */
-    private void validateAdminPermissions(String token) {
-        AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+    private boolean validateAdminPermissions(String token) {
+        return (AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository));
+    }
+
+    public boolean validateAdmin(String token) {
+        return validateAdminPermissions(token);
     }
 }

@@ -3,10 +3,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.env
-src/main/resources/application.properties
-target
-docs
 out/
 out
 
@@ -37,10 +33,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Docker ###
-user-microservice.tar
-*.tar
-
-### Python ###
-myenv
