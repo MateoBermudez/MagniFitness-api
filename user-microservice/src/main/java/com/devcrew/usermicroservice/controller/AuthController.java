@@ -5,13 +5,8 @@ import com.devcrew.usermicroservice.dto.LoginRequest;
 import com.devcrew.usermicroservice.dto.RegisterRequest;
 import com.devcrew.usermicroservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * AuthController is a class that handles the authentication requests.
@@ -26,17 +21,10 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class AuthController {
 
-    //Delete it later
-    @Value("${internal.api.key}")
-    private String internalApiKey;
-
     /**
      * The authService field is used to authenticate the user and register a new user.
      */
     private final AuthService authService;
-
-    //Delete it later
-    private final RestTemplate restTemplate;
 
     /**
      * The login method is used to authenticate the user.
@@ -66,39 +54,5 @@ public class AuthController {
     public ResponseEntity<Object> register(@RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.ok(response);
-    }
-
-    //Delete it later
-    @GetMapping("/test")
-    public void test() {
-        String json = """
-                {
-                     "actionId": {
-                         "id": 1,
-                         "name": "action1"
-                     },
-                     "moduleId": {
-                         "id": 1,
-                         "name": "module1"
-                     },
-                     "entityId": {
-                         "id": 1,
-                         "name": "entity1"
-                     },
-                     "userId": 1,
-                     "creationDate": "2024-01-01",
-                     "description": "description",
-                     "jsonBefore": "{}",
-                     "jsonAfter": "{Hello: World}"
-                 }
-                """;
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Internal-Api-Key", internalApiKey);
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> entity = new HttpEntity<>(json, headers);
-        // This changes with the ip, fix it later
-        String url = "http://192.168.10.14:8079/log/save-log";
-        restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     }
 }

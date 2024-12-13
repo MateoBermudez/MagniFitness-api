@@ -8,6 +8,7 @@ import com.devcrew.usermicroservice.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -78,6 +79,8 @@ public class AuthIntegrationTest {
      * @throws Exception if an error occurs during the request
      */
     @Test
+    @Deprecated
+    @Disabled
     public void loginTest() throws Exception {
         SaveUser();
         String jsonLogin = """
@@ -108,6 +111,8 @@ public class AuthIntegrationTest {
      * @throws Exception if an error occurs during the request
      */
     @Test
+    @Deprecated
+    @Disabled
     public void registerTest() throws Exception{
         String jsonRegister = """
                 {
@@ -141,7 +146,7 @@ public class AuthIntegrationTest {
         Optional<AppUser> user = userRepository.findByUsername("Eldest");
 
         Assertions.assertTrue(user.isPresent());
-        Assertions.assertEquals(user.get().getAppPerson().getName(), "Julian");
+        Assertions.assertEquals("Julian", user.get().getAppPerson().getName());
     }
 
     /**

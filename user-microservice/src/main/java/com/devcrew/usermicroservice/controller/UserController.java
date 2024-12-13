@@ -153,4 +153,11 @@ public class UserController {
         boolean isAdmin = userService.validateAdmin(token);
         return ResponseEntity.ok(isAdmin);
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
+    @PostMapping("/logout/{username}")
+    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
+        userService.logout(token, username);
+        return ResponseEntity.noContent().build();
+    }
 }

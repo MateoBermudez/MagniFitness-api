@@ -11,6 +11,7 @@ import com.devcrew.usermicroservice.repository.RolePermissionRepository;
 import com.devcrew.usermicroservice.repository.RoleRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import com.devcrew.usermicroservice.utils.AuthorizationUtils;
+import com.devcrew.usermicroservice.utils.JsonBuilderUtils;
 import com.devcrew.usermicroservice.utils.JwtValidation;
 import com.devcrew.usermicroservice.utils.ValidationUtils;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,11 @@ import java.util.List;
  */
 @Service
 public class UserService {
+
+    /**
+     * Log sender service for sending logs to another service.
+     */
+    private final LogSenderService logSenderService;
 
     /**
      * User repository for accessing user data.
@@ -63,7 +69,13 @@ public class UserService {
      * @param roleRepository the role repository
      */
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtValidation jwtValidation, RolePermissionRepository rolePermissionRepository, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtValidation jwtValidation,
+                       RolePermissionRepository rolePermissionRepository,
+                       RoleRepository roleRepository,
+                       LogSenderService logSenderService) {
+        this.logSenderService = logSenderService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtValidation = jwtValidation;
@@ -104,6 +116,15 @@ public class UserService {
     public void deleteUser(String username, String token) {
         try {
             AppUser user = validatePermissions(username, token, "DELETE");
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "User", "app_user", user.getId(),
+                    "User with " + username + " username has been deleted successfully.",
+                    JsonBuilderUtils.jsonBuilder(user),
+                    "{}"
+            );
+
             userRepository.deleteById(user.getId());
         } catch (UserDoesNotExistException ex) {
             throw ex;
@@ -125,11 +146,25 @@ public class UserService {
     public void updateUserEmail(String token, String username, String email) {
         try {
             ValidationUtils.isEmailValid(email);
-            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            AppUser user = validatePermissions(username, token, "UPDATE");
             if (user.getEmail().equals(email)) {
                 throw new UserAlreadyExistsException("Same Email");
             }
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
             user.setEmail(email);
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + username + " username email has been changed successfully.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
             userRepository.save(user);
         } catch (UserAlreadyExistsException ex) {
             throw ex;
@@ -150,14 +185,28 @@ public class UserService {
     @Transactional
     public void updateUserUsername(String token, String username, String newUsername) {
         try {
-            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            AppUser user = validatePermissions(username, token, "UPDATE");
             if (user.getUsername().equals(newUsername)) {
                 throw new UserAlreadyExistsException("Same Username");
             }
             if (userRepository.findByUsername(newUsername).isPresent()) {
                 throw new UserAlreadyExistsException("User already exists");
             }
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
             user.setUsername(newUsername);
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + username + " username has been changed successfully to " + newUsername + " username.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
             userRepository.save(user);
         } catch (UserAlreadyExistsException ex) {
             throw ex;
@@ -176,9 +225,24 @@ public class UserService {
     @Transactional
     public void changeUserPassword(String token, String username, String password) {
         try {
-            AppUser user = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            AppUser user = validatePermissions(username, token, "UPDATE");
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
             user.setHashed_password(passwordEncoder.encode(password));
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
+
             userRepository.save(user);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + username + " username password has been changed successfully.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
@@ -202,10 +266,57 @@ public class UserService {
             Role role = roleRepository.findByName(roleInput).orElseThrow(
                     () -> new BadRequestException("Role does not exist")
             );
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
             user.setRole(role);
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
+
             userRepository.save(user);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + username + " username role has been changed successfully.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
         } catch (UserDoesNotExistException | BadRequestException ex) {
             throw ex;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    /**
+     * Logs out a user of the system by setting the loggedIn field to false.
+     *
+     * @param token the JWT token of the user doing the operation
+     * @param username the username of the user
+     */
+    @Transactional
+    public void logout(String token, String username) {
+        try {
+            AppUser user = validatePermissions(username, token, "UPDATE");
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
+            user.setLoggedIn(false);
+            userRepository.save(user);
+            jwtValidation.invalidateToken(token);
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + username + " username has been logged out successfully.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
@@ -233,6 +344,11 @@ public class UserService {
         return (AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository));
     }
 
+    /**
+     * Validates if the user has admin permissions.
+     *
+     * @param token the JWT token of the user doing the operation
+     */
     public boolean validateAdmin(String token) {
         return validateAdminPermissions(token);
     }

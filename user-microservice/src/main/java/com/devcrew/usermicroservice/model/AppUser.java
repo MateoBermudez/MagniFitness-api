@@ -77,6 +77,7 @@ public class AppUser implements UserDetails {
      */
     @Column(name = "password")
     @NotNull
+    @JsonIgnore
     private String hashed_password;
 
 //    Two-step verification later
@@ -120,6 +121,13 @@ public class AppUser implements UserDetails {
     Boolean enabled = true;
 
     /**
+     * The logged in status of the user.
+     */
+    @Column(name = "logged_in")
+    @NotNull
+    Boolean loggedIn = false;
+
+    /**
      * The person associated with the user.
      */
     @OneToOne(cascade = CascadeType.ALL, optional = false)
@@ -133,6 +141,7 @@ public class AppUser implements UserDetails {
      * The image URI of the user. (URL of the image)
      */
     @Column(name = "image_uri")
+    @JsonIgnore
     String imageUri;
 
     /**
@@ -147,6 +156,8 @@ public class AppUser implements UserDetails {
      * @param role the role of the user
      * @param imageUri the image URI of the user
      */
+
+    @JsonIgnore
     public AppUser(String username, String email, boolean authenticated, LocalDate createdAt, LocalDate updatedAt, AppPerson appPerson, Role role, String imageUri) {
         this.email = email;
         this.username = username;
@@ -164,6 +175,7 @@ public class AppUser implements UserDetails {
      * @return the role of the user
      */
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.getName()));
     }
@@ -174,6 +186,7 @@ public class AppUser implements UserDetails {
      * @return the password of the user
      */
     @Override
+    @JsonIgnore
     public String getPassword() {
         return hashed_password;
     }
@@ -184,6 +197,7 @@ public class AppUser implements UserDetails {
      * @return true for all users
      */
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
@@ -194,6 +208,7 @@ public class AppUser implements UserDetails {
      * @return true for all users
      */
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
@@ -204,6 +219,7 @@ public class AppUser implements UserDetails {
      * @return true for all users
      */
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
@@ -214,6 +230,7 @@ public class AppUser implements UserDetails {
      * @return true for all users
      */
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }
