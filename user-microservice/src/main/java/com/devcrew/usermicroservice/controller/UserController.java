@@ -4,7 +4,6 @@ import com.devcrew.usermicroservice.dto.UserDTO;
 import com.devcrew.usermicroservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.List;
  * This class is the controller class for the User entity.
  * It contains the endpoints for the User entity.
  * The endpoints are used to get, add, update, and delete a user.
- * The endpoints are secured with the @PreAuthorize annotation to restrict access to the endpoints.
  * The endpoints are secured based on the role of the user.
  */
 @RestController
@@ -41,7 +39,6 @@ public class UserController {
      * @return A response entity containing the list of users in the system.
      */
     //Only admin can get all users
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/get-all")
     public ResponseEntity<Object> getUsers(@RequestHeader("Authorization") String token) {
         List<UserDTO> users = userService.getUsers(token);
@@ -56,7 +53,6 @@ public class UserController {
      * @return A response entity containing the information of the user.
      */
     //Only admin can get the info of any user, and user can get his own info
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @GetMapping(path = "info/{username}")
     public ResponseEntity<Object> getUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         UserDTO user = userService.getUserInfo(token, username);
@@ -71,7 +67,6 @@ public class UserController {
      * @return A response entity indicating that the user has been deleted from the system.
      */
     //Only admin can delete any user, and user can delete his own account
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @DeleteMapping(path = "delete/{username}")
     public ResponseEntity<Object> deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.deleteUser(username, token);
@@ -87,7 +82,6 @@ public class UserController {
      * @return A response entity indicating that the email of the user has been updated.
      */
     //Only admin can change the email of any user, and user can change his own email
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "updateEmail/{username}")
     public ResponseEntity<Object> updateUserEmail(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                   @RequestParam() String email) {
@@ -104,7 +98,6 @@ public class UserController {
      * @return A response entity indicating that the username of the user has been updated.
      */
     //Only admin can change the username of any user, and user can change his own username
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "updateUsername/{username}")
     public ResponseEntity<Object> updateUserUsername(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                      @RequestParam() String newUsername) {
@@ -121,7 +114,6 @@ public class UserController {
      * @return A response entity indicating that the password of the user has been changed.
      */
     //Only admin can change the password of any user, and user can change his own password
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "changePassword/{username}")
     public ResponseEntity<Object> changePassword(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                  @RequestParam() String password) {
@@ -139,7 +131,6 @@ public class UserController {
      * @return A response entity indicating that the role of the user has been changed.
      */
     //Only admin can change the role of any user
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(path = "changeRole/{username}")
     public ResponseEntity<Object> changeRole(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                              @RequestParam() String role) {
@@ -147,14 +138,12 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "validate-admin")
     public ResponseEntity<Object> validateAdmin(@RequestHeader("Authorization") String token) {
         boolean isAdmin = userService.validateAdmin(token);
         return ResponseEntity.ok(isAdmin);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PostMapping("/logout/{username}")
     public ResponseEntity<Object> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.logout(token, username);

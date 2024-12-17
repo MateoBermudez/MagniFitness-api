@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - bridge
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8079:8079"
+    networks:
+      - bridge
+    depends_on:
+      - eureka-server
+  user-microservice:
+    build:
+        context: ./user-microservice
+        dockerfile: Dockerfile
+    container_name: user-microservice
+    ports:
+      - "8080:8080"
+    networks:
+      - bridge
+    depends_on:
+      - eureka-server
+      - api-gateway
+  log-microservice:
+    build:
+      context: ./log-microservice
+      dockerfile: Dockerfile
+    container_name: log-microservice
+    ports:
+      - "8081:8081"
+    networks:
+      - bridge
+    depends_on:
+        - eureka-server
+        - api-gateway
+        - user-microservice
+
+networks:
+    bridge:
+        driver: bridge
+        name: project-network

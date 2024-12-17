@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table (
@@ -60,7 +60,7 @@ public class LogEvent {
     //It will never be updated (The log is created only once)
     @CreationTimestamp
     @Column(name = "creation_date")
-    private Date creationDate;
+    private LocalDateTime creationDate;
 
     @Column(name = "description")
     @NotNull

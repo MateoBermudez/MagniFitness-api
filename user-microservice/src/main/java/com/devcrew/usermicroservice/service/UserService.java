@@ -18,6 +18,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.List;
 
@@ -351,5 +352,28 @@ public class UserService {
      */
     public boolean validateAdmin(String token) {
         return validateAdminPermissions(token);
+    }
+
+
+    /**
+     * Saves a user to the database.
+     *
+     * @param oAuth2User the user to save
+     * @return the saved user
+     */
+    @Transactional
+    public AppUser saveOAuth2User(OAuth2User oAuth2User) {
+        String email = oAuth2User.getAttribute("email");
+        if (email == null) {
+            // Only for GitHub and testing purposes
+            email = oAuth2User.getAttribute("login") + "@github.com";
+        }
+        AppUser user = userRepository.findByEmail(email).orElse(new AppUser());
+        user.setEmail(email);
+        user.setUsername(oAuth2User.getAttribute("login"));
+        user.setRole(roleRepository.findByName("USER").orElse(null));
+        user.setEnabled(true);
+        user.setLoggedIn(true);
+        return userRepository.save(user);
     }
 }

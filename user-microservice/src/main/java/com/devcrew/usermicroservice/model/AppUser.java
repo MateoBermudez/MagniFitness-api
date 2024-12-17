@@ -76,7 +76,6 @@ public class AppUser implements UserDetails {
      * The password of the user.
      */
     @Column(name = "password")
-    @NotNull
     @JsonIgnore
     private String hashed_password;
 
@@ -130,7 +129,7 @@ public class AppUser implements UserDetails {
     /**
      * The person associated with the user.
      */
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     @JsonIgnore
     @JsonManagedReference

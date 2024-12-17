@@ -5,7 +5,6 @@ import com.devcrew.usermicroservice.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +40,6 @@ public class PersonController {
      * @return A response entity containing the list of people in the system.
      */
     //Only admin can get all-people information
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(path = "/get-all")
     public ResponseEntity<Object> getPeople(@RequestHeader("Authorization") String token) {
         List<PersonDTO> people = personService.getPeople(token);
@@ -56,7 +54,6 @@ public class PersonController {
      */
     //User is null, to make user not null, they use the authentication controller -> Register into the system
     //Only admin can get the information of any person, and user can get his own information
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @GetMapping(path = "/info/{username}")
     public ResponseEntity<Object> getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
         PersonDTO person = personService.getPerson(token, username);
@@ -83,7 +80,6 @@ public class PersonController {
      * @return A response entity indicating that the information of the person has been updated.
      */
     //Only admin can update any person's information, and a user can update their own information
-    @PreAuthorize("hasRole('ROLE_ADMIN') or #username == authentication.principal.username")
     @PutMapping(path = "/update/{username}")
     public ResponseEntity<Object> updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
         personService.updatePersonInfo(token, personDTO, username);
@@ -97,7 +93,6 @@ public class PersonController {
      * @return A response entity indicating that the person has been deleted from the system.
      */
     //Only admin can delete any person
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(path = "/delete/{id}")
     public ResponseEntity<Object> deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
         personService.deletePerson(token, id);

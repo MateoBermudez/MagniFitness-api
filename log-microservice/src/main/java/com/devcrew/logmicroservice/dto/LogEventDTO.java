@@ -2,7 +2,7 @@ package com.devcrew.logmicroservice.dto;
 
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -17,5 +17,5 @@ public class LogEventDTO {
     private AppEntityDTO appEntity;
     private AppModuleDTO appModule;
     private Integer user_identifier;
-    private Date creationDate;
+    private LocalDateTime creationDate;
 }

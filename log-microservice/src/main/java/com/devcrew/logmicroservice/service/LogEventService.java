@@ -1,6 +1,11 @@
 package com.devcrew.logmicroservice.service;
 
 import com.devcrew.logmicroservice.dto.LogEventDTO;
+import com.devcrew.logmicroservice.dto.LogEventFilter;
+import com.devcrew.logmicroservice.dto.PaginatedLogsResponse;
+import com.devcrew.logmicroservice.mapper.ActionMapper;
+import com.devcrew.logmicroservice.mapper.AppEntityMapper;
+import com.devcrew.logmicroservice.mapper.AppModuleMapper;
 import com.devcrew.logmicroservice.mapper.LogEventMapper;
 import com.devcrew.logmicroservice.model.Action;
 import com.devcrew.logmicroservice.model.AppEntity;
@@ -13,14 +18,11 @@ import com.devcrew.logmicroservice.repository.ModuleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LogEventService {
@@ -46,20 +48,52 @@ public class LogEventService {
         return logs.stream().map(LogEventMapper::toDTO).toList();
     }
 
-    public Page<LogEventDTO> getPaginatedLogs(Integer page,
+    public PaginatedLogsResponse getPaginatedLogs(Integer page,
                                               Integer size,
-                                              String startDate,
-                                              String endDate,
+                                              LogEventFilter filter,
                                               String sortDirection) {
         Sort sort = Sort.by("creation_date");
         sort = sortDirection.equalsIgnoreCase("asc") ? sort.ascending() : sort.descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        LocalDateTime start = LocalDateTime.parse(startDate);
-        LocalDateTime end = LocalDateTime.parse(endDate);
+        LogEvent probe = getProbe(filter);
 
-        Page<LogEvent> logs = logEventRepository.findAllByDateBetween(start, end, pageable);
-        return logs.map(LogEventMapper::toDTO);
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                .withIgnoreNullValues()
+                .withIgnorePaths("creationDate", "description", "jsonBefore", "jsonAfter");
+
+        Example<LogEvent> example = Example.of(probe, matcher);
+
+        Page<LogEvent> logs;
+        long totalElements;
+
+        if (filter.getStartDate() != null && filter.getEndDate() != null) {
+            LocalDateTime startDate = LocalDateTime.parse(filter.getStartDate());
+            LocalDateTime endDate = LocalDateTime.parse(filter.getEndDate());
+            Page<LogEvent> filteredLogs = logEventRepository.findAll(example, pageable);
+            logs = new PageImpl<>(filteredLogs.stream()
+                    .filter(log -> {
+                        LocalDateTime creationDate = log.getCreationDate();
+                        return creationDate.isAfter(startDate) && creationDate.isBefore(endDate);
+                    })
+                    .collect(Collectors.toList()), pageable, filteredLogs.getTotalElements());
+        } else {
+            logs = logEventRepository.findAll(example, pageable);
+        }
+        totalElements = logs.getTotalElements();
+
+        Page<LogEventDTO> logEventDTOPage = logs.map(LogEventMapper::toDTO);
+        return new PaginatedLogsResponse(logEventDTOPage, totalElements);
+    }
+
+    private static LogEvent getProbe(LogEventFilter filter) {
+        LogEvent probe = new LogEvent();
+        if (filter.getId() != null) probe.setId(filter.getId());
+        if (filter.getAction() != null) probe.setActionId(ActionMapper.toEntity(filter.getAction()));
+        if (filter.getModule() != null) probe.setModuleId(AppModuleMapper.toEntity(filter.getModule()));
+        if (filter.getEntity() != null) probe.setEntityId(AppEntityMapper.toEntity(filter.getEntity()));
+        if (filter.getUserId() != null) probe.setUserId(filter.getUserId());
+        return probe;
     }
 
     @Transactional

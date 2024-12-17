@@ -1,9 +1,10 @@
 package com.devcrew.logmicroservice.controller;
 
 import com.devcrew.logmicroservice.dto.LogEventDTO;
+import com.devcrew.logmicroservice.dto.LogEventFilter;
+import com.devcrew.logmicroservice.dto.PaginatedLogsResponse;
 import com.devcrew.logmicroservice.service.LogEventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
@@ -29,11 +30,10 @@ public class LogEventController {
     @GetMapping("/get-paginated-logs")
     public ResponseEntity<Object> getPaginatedLogs(@RequestParam Integer page,
                                                    @RequestParam Integer size,
-                                                   @RequestParam String startDate,
-                                                   @RequestParam String endDate,
+                                                   @RequestBody LogEventFilter filter,
                                                    @RequestParam String sortDirection) {
-        Page<LogEventDTO> logs = logEventService.getPaginatedLogs(page, size, startDate, endDate, sortDirection);
-        return ResponseEntity.ok(logs);
+        PaginatedLogsResponse response = logEventService.getPaginatedLogs(page, size, filter, sortDirection);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get-log/{id}")
