@@ -69,7 +69,6 @@ public class AppUser implements UserDetails {
      * The email of the user.
      */
     @Column(name = "email")
-    @NotNull
     private String email;
 
     /**

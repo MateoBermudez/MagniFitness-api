@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -362,18 +363,90 @@ public class UserService {
      * @return the saved user
      */
     @Transactional
-    public AppUser saveOAuth2User(OAuth2User oAuth2User) {
-        String email = oAuth2User.getAttribute("email");
-        if (email == null) {
-            // Only for GitHub and testing purposes
-            email = oAuth2User.getAttribute("login") + "@github.com";
+    public AppUser OAuth2Login(OAuth2User oAuth2User) {
+        AppUser user;
+        String usernameAttribute = getUsernameAttribute(oAuth2User);
+
+        user = userRepository.findByUsername(usernameAttribute).orElse(null);
+        // User already exists -> Check if the user is the same, if not, throw an exception
+        // If the user is the same, send a log and return the user
+        // The exception has to be changed with an alternative to create a new user with a different username
+        // This has to be fully checked and corrected
+        // Implement an alternative using the email attribute which is unique
+        if (user != null && !isSameUser(oAuth2User, user)) {
+            throw new UserAlreadyExistsException("User already exists, two different users with the same username. -> Different OAuth2 Provider used.");
         }
-        AppUser user = userRepository.findByEmail(email).orElse(new AppUser());
-        user.setEmail(email);
-        user.setUsername(oAuth2User.getAttribute("login"));
-        user.setRole(roleRepository.findByName("USER").orElse(null));
-        user.setEnabled(true);
-        user.setLoggedIn(true);
-        return userRepository.save(user);
+        if (user != null) {
+            sendLogForExistingOAuth2User(user);
+            return user;
+        }
+
+        user = handleOAuth2Login(oAuth2User, usernameAttribute);
+        sendLogForCreatedOAuth2User(user);
+        return user;
+    }
+
+    private boolean isSameUser(OAuth2User oAuth2User, AppUser user) {
+        return Objects.equals(oAuth2User.getAttribute("email"), user.getEmail());
+    }
+
+    private String getUsernameAttribute(OAuth2User oAuth2User) {
+        // GitHub provider
+        String name = oAuth2User.getAttribute("login");
+        if (name != null) {
+            return name.replaceAll("\\s", "");
+        }
+
+        // Google provider
+        name = oAuth2User.getAttribute("name");
+        return name != null ? name.replaceAll("\\s", "") : null;
+    }
+
+    private void sendLogForExistingOAuth2User(AppUser user) {
+        try {
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+            user.setLoggedIn(true);
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + user.getUsername() + " username has logged in successfully using OAuth2.",
+                    jsonBefore,
+                    JsonBuilderUtils.jsonBuilder(user)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private AppUser handleOAuth2Login(OAuth2User oAuth2User, String username) {
+        AppUser user;
+        try {
+            String email = oAuth2User.getAttribute("email");
+            user = userRepository.findByEmail(email).orElse(new AppUser());
+            user.setEmail(email);
+            user.setUsername(username);
+            user.setRole(roleRepository.findByName("USER").orElse(null));
+            user.setEnabled(true);
+            user.setLoggedIn(true);
+
+            user = userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return user;
+    }
+
+    private void sendLogForCreatedOAuth2User(AppUser user) {
+        try {
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "User", "app_user", user.getId(),
+                    "User with " + user.getUsername() + " username has been created successfully using OAuth2.",
+                    JsonBuilderUtils.jsonBuilder("{}"),
+                    JsonBuilderUtils.jsonBuilder(user)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }
