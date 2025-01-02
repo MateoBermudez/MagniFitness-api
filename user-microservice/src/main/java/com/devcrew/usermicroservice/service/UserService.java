@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -362,44 +361,22 @@ public class UserService {
      * @param oAuth2User the user to save
      * @return the saved user
      */
+    //Only Google is supported for now
     @Transactional
     public AppUser OAuth2Login(OAuth2User oAuth2User) {
         AppUser user;
-        String usernameAttribute = getUsernameAttribute(oAuth2User);
+        String emailAttribute = oAuth2User.getAttribute("email");
 
-        user = userRepository.findByUsername(usernameAttribute).orElse(null);
-        // User already exists -> Check if the user is the same, if not, throw an exception
-        // If the user is the same, send a log and return the user
-        // The exception has to be changed with an alternative to create a new user with a different username
-        // This has to be fully checked and corrected
-        // Implement an alternative using the email attribute which is unique
-        if (user != null && !isSameUser(oAuth2User, user)) {
-            throw new UserAlreadyExistsException("User already exists, two different users with the same username. -> Different OAuth2 Provider used.");
-        }
+        user = userRepository.findByEmail(emailAttribute).orElse(null);
+        // If the user already exists, log them in
         if (user != null) {
             sendLogForExistingOAuth2User(user);
             return user;
         }
 
-        user = handleOAuth2Login(oAuth2User, usernameAttribute);
+        user = handleOAuth2Login(oAuth2User, emailAttribute);
         sendLogForCreatedOAuth2User(user);
         return user;
-    }
-
-    private boolean isSameUser(OAuth2User oAuth2User, AppUser user) {
-        return Objects.equals(oAuth2User.getAttribute("email"), user.getEmail());
-    }
-
-    private String getUsernameAttribute(OAuth2User oAuth2User) {
-        // GitHub provider
-        String name = oAuth2User.getAttribute("login");
-        if (name != null) {
-            return name.replaceAll("\\s", "");
-        }
-
-        // Google provider
-        name = oAuth2User.getAttribute("name");
-        return name != null ? name.replaceAll("\\s", "") : null;
     }
 
     private void sendLogForExistingOAuth2User(AppUser user) {
@@ -418,10 +395,11 @@ public class UserService {
         }
     }
 
-    private AppUser handleOAuth2Login(OAuth2User oAuth2User, String username) {
+    private AppUser handleOAuth2Login(OAuth2User oAuth2User, String email) {
         AppUser user;
         try {
-            String email = oAuth2User.getAttribute("email");
+            String username = oAuth2User.getAttribute("name");
+            username = (username != null) ? username.replaceAll("\\s", "") : null;
             user = userRepository.findByEmail(email).orElse(new AppUser());
             user.setEmail(email);
             user.setUsername(username);
