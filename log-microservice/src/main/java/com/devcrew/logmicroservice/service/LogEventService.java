@@ -52,7 +52,7 @@ public class LogEventService {
                                               Integer size,
                                               LogEventFilter filter,
                                               String sortDirection) {
-        Sort sort = Sort.by("creation_date");
+        Sort sort = Sort.by("creationDate");
         sort = sortDirection.equalsIgnoreCase("asc") ? sort.ascending() : sort.descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
