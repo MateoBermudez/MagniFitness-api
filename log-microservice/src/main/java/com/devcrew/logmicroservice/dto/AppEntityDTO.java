@@ -2,6 +2,9 @@ package com.devcrew.logmicroservice.dto;
 
 import lombok.*;
 
+/**
+ * Data Transfer Object for AppEntity entity.
+ */
 @Data
 @Builder
 @RequiredArgsConstructor

@@ -138,12 +138,22 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * This endpoint is used to validate if a user is an admin.
+     * @param token The token of the user making the request.
+     * @return A response entity indicating if the user is an admin.
+     */
     @GetMapping(path = "validate-admin")
     public ResponseEntity<Object> validateAdmin(@RequestHeader("Authorization") String token) {
         boolean isAdmin = userService.validateAdmin(token);
         return ResponseEntity.ok(isAdmin);
     }
 
+    /**
+     * This endpoint is used to log out a user.
+     * @param token The token of the user making the request.
+     * @return A response entity indicating that the user has been logged out.
+     */
     @PostMapping("/logout/{username}")
     public ResponseEntity<Object> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.logout(token, username);

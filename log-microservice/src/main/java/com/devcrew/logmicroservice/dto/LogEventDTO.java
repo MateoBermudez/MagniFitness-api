@@ -4,6 +4,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for LogEvent entity.
+ */
 @Data
 @Builder
 @RequiredArgsConstructor

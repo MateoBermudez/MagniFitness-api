@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+/**
+ * App entity, represents all the tables of the project database.
+ */
 @Entity
 @Table(
         name = "APP_ENTITY",
@@ -22,6 +25,9 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 public class AppEntity {
 
+    /**
+     * AppEntity id
+     */
     @Id
     @SequenceGenerator(
             name = "app_entity_sequence",
@@ -34,6 +40,9 @@ public class AppEntity {
     )
     private Integer id;
 
+    /**
+     * AppEntity name
+     */
     @Column(name = "name")
     @NotNull
     private String name;

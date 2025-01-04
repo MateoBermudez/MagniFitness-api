@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.sql.SQLException;
 
+/**
+ * GlobalExceptionHandler class is used to handle exceptions globally.
+ * It is used to handle exceptions that are not handled by the controller.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

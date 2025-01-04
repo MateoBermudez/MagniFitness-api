@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+/**
+ * Action entity, represents the action that the user has performed based on CRUD operations.
+ */
 @Entity
 @Table (
         name = "ACTION",
@@ -22,6 +25,9 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 public class Action {
 
+    /**
+     * Action id
+     */
     @Id
     @SequenceGenerator(
             name = "action_sequence",
@@ -34,6 +40,9 @@ public class Action {
     )
     private Integer id;
 
+    /**
+     * Action name
+     */
     @Column(name = "name")
     @NotNull
     private String name;

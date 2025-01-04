@@ -12,6 +12,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * This filter is responsible for authenticating the admin user.
+ * It sends a request to the user microservice to check if the user is an admin.
+ * If the user is an admin, the request is forwarded to the target service.
+ */
 @Component
 public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilter.Config> {
 
@@ -29,9 +34,17 @@ public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilte
 
     @Configuration
     public static class Config {
-        // Put configuration properties here
+        // No configuration needed
     }
 
+    /**
+     * This method is called when the filter is applied.
+     * It checks if the user is an admin by sending a request to the user microservice.
+     * If the user is an admin, the request is forwarded to the target service.
+     * If the user is not an admin, a 403 Forbidden response is returned.
+     * @param config The configuration of the filter
+     * @return The filter
+     */
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
@@ -53,6 +66,12 @@ public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilte
         };
     }
 
+    /**
+     * This method sends a request to the user microservice to check if the user is an admin.
+     * @param exchange The server web exchange
+     * @param config The configuration of the filter
+     * @return True if the user is an admin, false otherwise
+     */
     private boolean authenticateAdmin(ServerWebExchange exchange, Config config) {
         String jwt = exchange.getRequest().getHeaders().getFirst("Authorization");
 

@@ -7,6 +7,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class is responsible for filtering requests based on the API key.
+ * It checks if the API key in the request header matches the internal API key.
+ * It works for the log microservice.
+ * Because the log microservice is an internal service, only accessed by admins.
+ */
 @Component
 public class ApiKeyFilter extends AbstractGatewayFilterFactory<ApiKeyFilter.Config> {
 
@@ -21,6 +27,11 @@ public class ApiKeyFilter extends AbstractGatewayFilterFactory<ApiKeyFilter.Conf
         // No configuration properties needed
     }
 
+    /**
+     * This method checks if the API key in the request header matches the internal API key.
+     * @param config Configuration properties
+     * @return GatewayFilter
+     */
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {

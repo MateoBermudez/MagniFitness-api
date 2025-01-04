@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authProvider;
 
     /**
-     * Creates a SecurityFilterChain bean that configures the security filter chain to authenticate the user using JWT.
+     * Creates a SecurityFilterChain bean that configures the security filter chain to authenticate the user using JWT or OAuth2.
      *
      * @param http the HttpSecurity instance
      * @param jwtAuthenticationFilter the JwtAuthenticationFilter instance

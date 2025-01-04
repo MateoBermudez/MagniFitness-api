@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+/**
+ * Module entity that represents the module of the application, it can be payment, user, etc.
+ */
 @Entity
 @Table(
         name = "MODULE",
@@ -22,6 +25,9 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 public class AppModule {
 
+    /**
+     * Module id
+     */
     @Id
     @SequenceGenerator(
             name = "module_sequence",
@@ -34,6 +40,9 @@ public class AppModule {
     )
     private Integer id;
 
+    /**
+     * Module name
+     */
     @Column(name = "name")
     @NotNull
     private String name;

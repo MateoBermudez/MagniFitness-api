@@ -24,17 +24,41 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for LogEvent entity
+ * Contains methods for getting, saving, deleting and filtering logs
+ * Also contains methods for getting a single log and deleting all logs
+ */
 @Service
 public class LogEventService {
 
+    /**
+     * Repository for LogEvent entity
+     */
     private final LogEventRepository logEventRepository;
 
+    /**
+     * Repository for AppEntity entity
+     */
     private final AppEntityRepository appEntityRepository;
 
+    /**
+     * Repository for Action entity
+     */
     private final ActionRepository actionRepository;
 
+    /**
+     * Repository for AppModule entity
+     */
     private final ModuleRepository moduleRepository;
 
+    /**
+     * Constructor for LogEventService, initializes repositories
+     * @param logEventRepository Repository for LogEvent entity
+     * @param appEntityRepository Repository for AppEntity entity
+     * @param actionRepository Repository for Action entity
+     * @param moduleRepository Repository for AppModule entity
+     */
     @Autowired
     public LogEventService(LogEventRepository logEventRepository, AppEntityRepository appEntityRepository, ActionRepository actionRepository, ModuleRepository moduleRepository) {
         this.logEventRepository = logEventRepository;
@@ -43,11 +67,23 @@ public class LogEventService {
         this.moduleRepository = moduleRepository;
     }
 
+    /**
+     * Method for getting all logs
+     * @return List of LogEventDTO objects
+     */
     public List<LogEventDTO> getLogs() {
         List<LogEvent> logs = logEventRepository.findAll();
         return logs.stream().map(LogEventMapper::toDTO).toList();
     }
 
+    /**
+     * Method for getting paginated logs
+     * @param page Page number
+     * @param size Number of logs per page
+     * @param filter Filter for logs
+     * @param sortDirection Sort direction
+     * @return PaginatedLogsResponse object
+     */
     public PaginatedLogsResponse getPaginatedLogs(Integer page,
                                               Integer size,
                                               LogEventFilter filter,
@@ -86,6 +122,11 @@ public class LogEventService {
         return new PaginatedLogsResponse(logEventDTOPage, totalElements);
     }
 
+    /**
+     * Method for getting a probe for filtering logs
+     * @param filter Filter for logs
+     * @return LogEvent object with filter parameters
+     */
     private static LogEvent getProbe(LogEventFilter filter) {
         LogEvent probe = new LogEvent();
         if (filter.getId() != null) probe.setId(filter.getId());
@@ -96,6 +137,11 @@ public class LogEventService {
         return probe;
     }
 
+    /**
+     * Method for saving a log event
+     * @param logEventJSON JSON representation of a log event
+     * @throws Exception if JSON is invalid or entity, module or action is not found
+     */
     @Transactional
     public void saveLogEvent(String logEventJSON) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -103,6 +149,12 @@ public class LogEventService {
         logEventRepository.save(mapLogEvent(logEvent));
     }
 
+    /**
+     * Method for mapping log event, setting entity, module and action IDs and names.
+     * It was created because LogEvents usually came without Entity, Module and Action Names.
+     * @param logEvent LogEvent object
+     * @return LogEvent object with entity, module and action IDs and names
+     */
     private LogEvent mapLogEvent(LogEvent logEvent) {
         logEvent.setEntityId(extractEntity(logEvent));
         logEvent.setActionId(extractActions(logEvent));
@@ -110,6 +162,11 @@ public class LogEventService {
         return logEvent;
     }
 
+    /**
+     * Method for extracting entity from log event and setting its ID and name
+     * @param logEvent LogEvent object
+     * @return AppEntity object
+     */
     private AppEntity extractEntity(LogEvent logEvent) {
         AppEntity entity = logEvent.getEntityId();
         Integer id = appEntityRepository.findByName(entity.getName()).orElseThrow(
@@ -119,6 +176,11 @@ public class LogEventService {
         return entity;
     }
 
+    /**
+     * Method for extracting module from log event and setting its ID and name
+     * @param logEvent LogEvent object
+     * @return AppModule object
+     */
     private AppModule extractModules(LogEvent logEvent) {
         AppModule module = logEvent.getModuleId();
         Integer id = moduleRepository.findByName(module.getName()).orElseThrow(
@@ -128,6 +190,11 @@ public class LogEventService {
         return module;
     }
 
+    /**
+     * Method for extracting action from log event and setting its ID and name
+     * @param logEvent LogEvent object
+     * @return Action object
+     */
     private Action extractActions(LogEvent logEvent) {
         Action action = logEvent.getActionId();
         Integer id = actionRepository.findByName(logEvent.getActionId().getName()).orElseThrow(
@@ -137,6 +204,11 @@ public class LogEventService {
         return action;
     }
 
+    /**
+     * Method for getting a single log by ID
+     * @param id Log ID to get
+     * @return LogEventDTO object
+     */
     public LogEventDTO getLog(Integer id) {
         LogEvent log = logEventRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Log with id " + id + " not found")
@@ -144,6 +216,10 @@ public class LogEventService {
         return LogEventMapper.toDTO(log);
     }
 
+    /**
+     * Method for deleting a single log by ID
+     * @param id Log ID to delete
+     */
     @Transactional
     public void deleteLog(Integer id) {
         logEventRepository.findById(id).orElseThrow(
@@ -152,6 +228,9 @@ public class LogEventService {
         logEventRepository.deleteById(id);
     }
 
+    /**
+     * Method for deleting all logs from the database
+     */
     @Transactional
     public void deleteLogs() {
         logEventRepository.deleteAll();

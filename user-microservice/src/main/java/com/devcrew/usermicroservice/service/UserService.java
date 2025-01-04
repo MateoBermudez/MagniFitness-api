@@ -357,6 +357,8 @@ public class UserService {
 
     /**
      * Saves a user to the database.
+     * If the user already exists, it returns the user.
+     * This is used for OAuth2 login.
      *
      * @param oAuth2User the user to save
      * @return the saved user
@@ -379,6 +381,10 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Sends a log for an existing OAuth2 user.
+     * @param user the user to send the log for
+     */
     private void sendLogForExistingOAuth2User(AppUser user) {
         try {
             String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
@@ -395,6 +401,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Handles the OAuth2 login.
+     * Saves the user to the database.
+     * @param oAuth2User the OAuth2 user
+     * @param email the email of the user
+     * @return the saved user
+     */
     private AppUser handleOAuth2Login(OAuth2User oAuth2User, String email) {
         AppUser user;
         try {
@@ -414,6 +427,10 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Sends a log for a created OAuth2 user.
+     * @param user the user to send the log for
+     */
     private void sendLogForCreatedOAuth2User(AppUser user) {
         try {
             logSenderService.sendLog(

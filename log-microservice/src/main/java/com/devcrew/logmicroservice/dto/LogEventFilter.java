@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * LogEventFilter is a DTO class used to filter log events.
+ * If an attribute is null, it is not used in the filter.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
