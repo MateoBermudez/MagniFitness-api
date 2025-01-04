@@ -20,6 +20,8 @@ services:
       - bridge
     depends_on:
       - eureka-server
+    env_file:
+      - ./api-gateway/.env
   user-microservice:
     build:
         context: ./user-microservice
@@ -32,6 +34,8 @@ services:
     depends_on:
       - eureka-server
       - api-gateway
+    env_file:
+      - ./user-microservice/.env
   log-microservice:
     build:
       context: ./log-microservice
@@ -45,6 +49,8 @@ services:
         - eureka-server
         - api-gateway
         - user-microservice
+    env_file:
+        - ./log-microservice/.env
 
 networks:
     bridge:
