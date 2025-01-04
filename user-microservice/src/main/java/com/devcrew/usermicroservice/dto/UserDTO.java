@@ -23,12 +23,13 @@ public class UserDTO {
      * The user_name field is used to store the name of the user.
      */
     private String user_name;
+
     /**
-     * The password field is used to store the password of the user.
+     * The mail field is used to store the mail of the user.
      */
     private String mail;
     /**
-     * The mail field is used to store the mail of the user.
+     * The authenticated field is used to store the authentication status of the user.
      */
     private boolean authenticated;
     /**

@@ -3,7 +3,6 @@ package com.devcrew.usermicroservice.security;
 import com.devcrew.usermicroservice.config.ApplicationConfig;
 import com.devcrew.usermicroservice.config.SecurityConfig;
 import com.devcrew.usermicroservice.config.UserAndPersonConfig;
-import com.devcrew.usermicroservice.config.WebConfig;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +32,7 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SpringBootTest
-@Import({UserAndPersonConfig.class, ApplicationConfig.class, SecurityConfig.class, WebConfig.class})
+@Import({UserAndPersonConfig.class, ApplicationConfig.class, SecurityConfig.class})
 public class JwtAuthenticationFilterTest {
 
     /**

@@ -1,29 +1,18 @@
-# Usar una imagen base de OpenJDK para construir y ejecutar la aplicación
-FROM openjdk:17 AS build
+FROM maven:3.9.4-eclipse-temurin-17 AS build
 
-# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos del proyecto al contenedor
-COPY . .
+COPY pom.xml .
+COPY src ./src
 
-# Dar permisos de ejecución al script mvnw
-RUN chmod +x mvnw mvnw.cmd
+RUN mvn clean package -DskipTests
 
-# Construir la aplicación usando Maven Wrapper
-RUN ./mvnw clean package -DskipTests || ./mvnw.cmd clean package -DskipTests
+FROM eclipse-temurin:17-jre-alpine
 
-# Usar una imagen base de OpenJDK para ejecutar la aplicación
-FROM openjdk:17
-
-# Establecer el directorio de trabajo
 WORKDIR /app
 
-# Copiar el archivo JAR generado desde la etapa de construcción
-COPY --from=build /app/target/user-microservice-0.0.1-SNAPSHOT.jar /app/user-microservice.jar
+COPY --from=build /app/target/user-microservice-0.0.1-SNAPSHOT.jar app.jar
 
-# Exponer el puerto 8080
 EXPOSE 8080
 
-# Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "/app/user-microservice.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

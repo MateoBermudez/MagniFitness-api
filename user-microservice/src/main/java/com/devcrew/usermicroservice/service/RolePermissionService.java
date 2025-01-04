@@ -8,6 +8,7 @@ import com.devcrew.usermicroservice.exception.CustomException;
 import com.devcrew.usermicroservice.mapper.PermissionMapper;
 import com.devcrew.usermicroservice.mapper.RoleMapper;
 import com.devcrew.usermicroservice.mapper.RolePermissionMapper;
+import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.model.Permission;
 import com.devcrew.usermicroservice.model.Role;
 import com.devcrew.usermicroservice.model.RolePermission;
@@ -16,6 +17,7 @@ import com.devcrew.usermicroservice.repository.RolePermissionRepository;
 import com.devcrew.usermicroservice.repository.RoleRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import com.devcrew.usermicroservice.utils.AuthorizationUtils;
+import com.devcrew.usermicroservice.utils.JsonBuilderUtils;
 import com.devcrew.usermicroservice.utils.JwtValidation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,11 @@ import java.util.List;
  */
 @Service
 public class RolePermissionService {
+
+    /**
+     * LogSenderService object for sending logs to the log microservice.
+     */
+    private final LogSenderService logSenderService;
 
     /**
      * RolePermissionRepository object for accessing the role_permission table in the database.
@@ -66,12 +73,13 @@ public class RolePermissionService {
      */
     @Autowired
     public RolePermissionService(RolePermissionRepository rolePermissionRepository, UserRepository userRepository, JwtValidation jwtValidation,
-                                 RoleRepository roleRepository, PermissionRepository permissionRepository) {
+                                 RoleRepository roleRepository, PermissionRepository permissionRepository, LogSenderService logSenderService) {
         this.rolePermissionRepository = rolePermissionRepository;
         this.userRepository = userRepository;
         this.jwtValidation = jwtValidation;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.logSenderService = logSenderService;
     }
 
     /**
@@ -95,6 +103,25 @@ public class RolePermissionService {
     public void deleteRolePermission(String token, Integer id) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
+            RolePermission rolePermission = rolePermissionRepository.findById(id).orElseThrow(
+                    () -> new BadRequestException("RolePermission not found")
+            );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "Permission", "role_permission", user.getId(),
+                    "User with " + username + " username has deleted a role permission.",
+                    JsonBuilderUtils.jsonBuilder(rolePermission),
+                    "{}"
+            );
+
             rolePermissionRepository.deleteById(id);
         } catch (CustomException ex) {
             throw new CustomException("Error deleting RolePermission\n" + ex.getMessage());
@@ -113,7 +140,23 @@ public class RolePermissionService {
     public void addRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             RolePermission rolePermissionEntity = RolePermissionMapper.toEntity(rolePermission);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "Permission", "role_permission", user.getId(),
+                    "User with " + username + " username has added a new role permission.",
+                    "{}",
+                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity)
+            );
+
             rolePermissionRepository.save(rolePermissionEntity);
         } catch (CustomException ex) {
             throw new CustomException("Error adding RolePermission\n" + ex.getMessage());
@@ -132,6 +175,13 @@ public class RolePermissionService {
     public void updateRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             RolePermission rolePermissionEntity = RolePermissionMapper.toEntity(rolePermission);
             RolePermission roleToUpdate = rolePermissionRepository.findById(rolePermissionEntity.getId()).orElseThrow(
                     () -> new BadRequestException("Role not found")
@@ -139,6 +189,15 @@ public class RolePermissionService {
             if (roleToUpdate.equals(rolePermissionEntity)) {
                 throw new BadRequestException("Data is the same");
             }
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "Permission", "role_permission", user.getId(),
+                    "User with " + username + " username has updated a role permission.",
+                    JsonBuilderUtils.jsonBuilder(roleToUpdate),
+                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity)
+            );
+
             rolePermissionRepository.save(rolePermissionEntity);
         } catch (CustomException ex) {
             throw new CustomException("Error updating RolePermission\n" + ex.getMessage());
@@ -250,9 +309,33 @@ public class RolePermissionService {
     public void deleteRole(String token, Integer roleId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Role role = roleRepository.findById(roleId).orElseThrow(
                     () -> new BadRequestException("Role not found")
             );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "Role", "role", user.getId(),
+                    "User with " + username + " username has deleted a role.",
+                    JsonBuilderUtils.jsonBuilder(role),
+                    "{}"
+            );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "Role", "role_permission", user.getId(),
+                    "User with " + username + " username has deleted the connections between the role and the permission.",
+                    JsonBuilderUtils.jsonBuilder(role),
+                    "{}"
+            );
+
             rolePermissionRepository.deleteByRole(role.getId());
             roleRepository.delete(role);
         } catch (CustomException ex) {
@@ -272,9 +355,33 @@ public class RolePermissionService {
     public void deletePermission(String token, Integer permissionId) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Permission permission = permissionRepository.findById(permissionId).orElseThrow(
                     () -> new BadRequestException("Permission not found")
             );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "Permission", "permission", user.getId(),
+                    "User with " + username + " username has deleted a permission.",
+                    JsonBuilderUtils.jsonBuilder(permission),
+                    "{}"
+            );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "Permission", "role_permission", user.getId(),
+                    "User with " + username + " username has deleted the connections between the role and the permission.",
+                    JsonBuilderUtils.jsonBuilder(permission),
+                    "{}"
+            );
+
             rolePermissionRepository.deleteByPermission(permission.getId());
             permissionRepository.delete(permission);
         } catch (CustomException ex) {
@@ -294,7 +401,23 @@ public class RolePermissionService {
     public void addRole(String token, RoleDTO role) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Role roleToAdd = RoleMapper.toEntity(role);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "Role", "role", user.getId(),
+                    "User with " + username + " username has added a new role.",
+                    "{}",
+                    JsonBuilderUtils.jsonBuilder(roleToAdd)
+            );
+
             roleRepository.save(roleToAdd);
         } catch (CustomException ex) {
             throw new CustomException("Error adding role\n" + ex.getMessage());
@@ -313,7 +436,23 @@ public class RolePermissionService {
     public void addPermission(String token, PermissionDTO permission) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Permission permissionToAdd = PermissionMapper.toEntity(permission);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "Permission", "permission", user.getId(),
+                    "User with " + username + " username has added a new permission.",
+                    "{}",
+                    JsonBuilderUtils.jsonBuilder(permissionToAdd)
+            );
+
             permissionRepository.save(permissionToAdd);
         } catch (CustomException ex) {
             throw new CustomException("Error adding permission\n" + ex.getMessage());
@@ -333,6 +472,13 @@ public class RolePermissionService {
     public void updateRole(String token, RoleDTO role) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Role roleEntity = RoleMapper.toEntity(role);
             Role roleToUpdate = roleRepository.findById(roleEntity.getId()).orElseThrow(
                     () -> new BadRequestException("Role not found")
@@ -341,6 +487,14 @@ public class RolePermissionService {
                 throw new BadRequestException("Data is the same");
             }
             //Cascade should propagate to RolePermission
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "Role", "role", user.getId(),
+                    "User with " + username + " username has updated a role.",
+                    JsonBuilderUtils.jsonBuilder(roleToUpdate),
+                    JsonBuilderUtils.jsonBuilder(roleEntity)
+            );
 
             roleRepository.save(roleEntity);
         } catch (CustomException ex) {
@@ -361,6 +515,13 @@ public class RolePermissionService {
     public void updatePermission(String token, PermissionDTO permission) {
         try {
             AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+
+            String username = jwtValidation.validateUsernameFromToken(token);
+
+            AppUser user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BadRequestException("User not found")
+            );
+
             Permission permissionEntity = PermissionMapper.toEntity(permission);
             Permission permissionToUpdate = permissionRepository.findById(permissionEntity.getId()).orElseThrow(
                     () -> new BadRequestException("Permission not found")
@@ -369,6 +530,14 @@ public class RolePermissionService {
                 throw new BadRequestException("Data is the same");
             }
             //Cascade should propagate to RolePermission
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "Permission", "permission", user.getId(),
+                    "User with " + username + " username has updated a permission.",
+                    JsonBuilderUtils.jsonBuilder(permissionToUpdate),
+                    JsonBuilderUtils.jsonBuilder(permissionEntity)
+            );
 
             permissionRepository.save(permissionEntity);
         } catch (CustomException ex) {

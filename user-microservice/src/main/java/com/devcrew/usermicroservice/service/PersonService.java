@@ -9,6 +9,7 @@ import com.devcrew.usermicroservice.repository.PersonRepository;
 import com.devcrew.usermicroservice.repository.RolePermissionRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
 import com.devcrew.usermicroservice.utils.AuthorizationUtils;
+import com.devcrew.usermicroservice.utils.JsonBuilderUtils;
 import com.devcrew.usermicroservice.utils.JwtValidation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,11 @@ public class PersonService {
     private final RolePermissionRepository rolePermissionRepository;
 
     /**
+     * Log sender service, used for sending logs to the log microservice.
+     */
+    private final LogSenderService logSenderService;
+
+    /**
      * Constructor for PersonService, uses Dependency Injection to inject the necessary repositories and utilities.
      *
      * @param personRepository the person repository
@@ -52,11 +58,12 @@ public class PersonService {
      * @param rolePermissionRepository the role permission repository
      */
     @Autowired
-    public PersonService(PersonRepository personRepository, UserRepository userRepository, JwtValidation jwtValidation, RolePermissionRepository rolePermissionRepository) {
+    public PersonService(PersonRepository personRepository, UserRepository userRepository, JwtValidation jwtValidation, RolePermissionRepository rolePermissionRepository, LogSenderService logSenderService) {
         this.personRepository = personRepository;
         this.userRepository = userRepository;
         this.jwtValidation = jwtValidation;
         this.rolePermissionRepository = rolePermissionRepository;
+        this.logSenderService = logSenderService;
     }
 
     /**
@@ -85,20 +92,30 @@ public class PersonService {
     /**
      * Updates the information of a person.
      *
-     * @param token the JWT token of the user making the request
+     * @param token the JWT token of the user making the request, the user is the same person whose information is being updated
      * @param personDTO the person DTO with updated information to be updated in the database
      * @param username the username of the user whose information is being updated
      */
     @Transactional
     public void updatePersonInfo(String token, PersonDTO personDTO, String username) {
         try {
-            AppPerson personFromToken = validatePermissions(username, token, "WRITE, EDIT, UPDATE");
+            AppPerson personFromToken = validatePermissions(username, token, "UPDATE");
             AppPerson person = PersonMapper.toEntity(personDTO);
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(personFromToken);
 
             person.setAppUser(personFromToken.getAppUser());
             person.setId(personFromToken.getId());
             person.getAppUser().setId(personFromToken.getAppUser().getId());
             person.getAppUser().setAppPerson(person);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_person", person.getId(),
+                    "Person with:" + person.getId() + " ID has been updated successfully.",
+                    jsonBefore,
+                    JsonBuilderUtils.jsonBuilder(person)
+            );
 
             personRepository.save(person);
         } catch (UserDoesNotExistException ex) {
@@ -117,6 +134,15 @@ public class PersonService {
     public void addPerson(PersonDTO personDTO) {
         try {
             AppPerson person = PersonMapper.toEntity(personDTO);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "User", "app_person", person.getId(),
+                    "Person with:" + person.getId() + " ID has been created successfully.",
+                    "{}",
+                    JsonBuilderUtils.jsonBuilder(person)
+            );
+
             personRepository.save(person);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
@@ -136,6 +162,15 @@ public class PersonService {
             AppPerson person = personRepository.findById(id).orElseThrow(
                     () -> new UserDoesNotExistException("User does not exist")
             );
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Delete", "User", "app_person", id,
+                    "Person with:" + id + " ID has been deleted successfully.",
+                    JsonBuilderUtils.jsonBuilder(person),
+                    "{}"
+            );
+
             personRepository.delete(person);
         } catch (UserDoesNotExistException ex) {
             throw ex;

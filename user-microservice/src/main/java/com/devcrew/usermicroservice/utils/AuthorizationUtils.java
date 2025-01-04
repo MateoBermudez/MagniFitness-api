@@ -72,7 +72,7 @@ public class AuthorizationUtils {
      * @param userRepository The userRepository object
      * @param rolePermissionRepository The rolePermissionRepository object
      */
-    public static void validateAdminPermissions(String token, JwtValidation jwtValidation, UserRepository userRepository, RolePermissionRepository rolePermissionRepository) {
+    public static boolean validateAdminPermissions(String token, JwtValidation jwtValidation, UserRepository userRepository, RolePermissionRepository rolePermissionRepository) {
         String roleFromToken = jwtValidation.validateRoleFromToken(token);
         String usernameFromToken = jwtValidation.validateUsernameFromToken(token);
         AppUser user = userRepository.findByUsername(usernameFromToken).orElseThrow(
@@ -84,6 +84,8 @@ public class AuthorizationUtils {
         if (!hasAdminPermission(roleFromToken, permissions)) {
             throw new UnauthorizedException("User does not have permission");
         }
+
+        return true;
     }
 
 

@@ -44,10 +44,10 @@ public class UserAndPersonConfig {
             Role userRole = new Role(1, "USER");
             Role adminRole = new Role(2, "ADMIN");
 
-            Permission permission1 = new Permission(1, "READ");
-            Permission permission2 = new Permission(2, "WRITE");
-            Permission permission3 = new Permission(3, "DELETE");
-            Permission permission4 = new Permission(4, "EDIT");
+            Permission permission1 = new Permission(1, "CREATE");
+            Permission permission2 = new Permission(2, "READ");
+            Permission permission3 = new Permission(3, "UPDATE");
+            Permission permission4 = new Permission(4, "DELETE");
             Permission permission5 = new Permission(5, "ADMIN");
             Permission permission6 = new Permission(6, "FULL_ACCESS");
 
@@ -72,13 +72,13 @@ public class UserAndPersonConfig {
             rolePermissionRepository.saveAll(
                     List.of(
                             new RolePermission(userRole, permission1, "READ permission for user"),
-                            new RolePermission(userRole, permission2, "WRITE permission for user"),
+                            new RolePermission(userRole, permission2, "CREATE permission for user"),
                             new RolePermission(userRole, permission3, "DELETE permission for user"),
-                            new RolePermission(userRole, permission4, "EDIT permission for user"),
+                            new RolePermission(userRole, permission4, "UPDATE permission for user"),
                             new RolePermission(adminRole, permission1, "READ permission for admin"),
-                            new RolePermission(adminRole, permission2, "WRITE permission for admin"),
+                            new RolePermission(adminRole, permission2, "CREATE permission for admin"),
                             new RolePermission(adminRole, permission3, "DELETE permission for admin"),
-                            new RolePermission(adminRole, permission4, "EDIT permission for admin"),
+                            new RolePermission(adminRole, permission4, "UPDATE permission for admin"),
                             new RolePermission(adminRole, permission5, "ADMIN permission for admin"),
                             new RolePermission(adminRole, permission6, "FULL permission for admin")
                     )
