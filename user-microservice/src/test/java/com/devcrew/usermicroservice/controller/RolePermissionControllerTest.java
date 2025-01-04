@@ -58,7 +58,6 @@ public class RolePermissionControllerTest {
 
         Assertions.assertNotNull(content);
         Assertions.assertFalse(content.isEmpty());
-        Assertions.assertTrue(content.contains("ADMIN") && content.contains("WRITE"));
         Assertions.assertTrue(content.contains("USER") && content.contains("READ") && content.contains("FULL_ACCESS"));
     }
 

@@ -10,6 +10,7 @@ import com.devcrew.usermicroservice.model.AppUser;
 import com.devcrew.usermicroservice.model.Role;
 import com.devcrew.usermicroservice.repository.RoleRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
+import com.devcrew.usermicroservice.utils.JsonBuilderUtils;
 import com.devcrew.usermicroservice.utils.ValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * Service class for managing authentication operations.
@@ -52,11 +55,17 @@ public class AuthService {
     private final RoleRepository roleRepository;
 
     /**
+     * Log sender service that provides log sending operations to another service.
+     */
+    private final LogSenderService logSenderService;
+
+    /**
      * Authenticates a user and generates a JWT token.
      *
      * @param request the login request containing the user's credentials
      * @return an AuthResponse containing the JWT token
      */
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         try {
             UserDetails userDetails;
@@ -74,6 +83,26 @@ public class AuthService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetails.getUsername(), request.getPassword()));
 
             String token = jwtService.getToken(userDetails);
+
+            AppUser userSaved = userRepository.findByUsername(request.getIdentifier()).orElse(null);
+            Integer userId = userSaved != null ? userSaved.getId() : null;
+            String username = userSaved != null ? userSaved.getUsername() : null;
+
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(userSaved);
+
+            Objects.requireNonNull(userSaved).setLoggedIn(true);
+            userRepository.save(userSaved);
+
+            String jsonAfter = JsonBuilderUtils.jsonBuilder(userSaved);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", userId,
+                    "User with " + username + " username has been logged in successfully.",
+                    jsonBefore,
+                    jsonAfter
+            );
+
             return AuthResponse.builder()
                     .token(token)
                     .build();
@@ -119,7 +148,20 @@ public class AuthService {
 
             user.getAppPerson().setAppUser(user);
 
+            user.setLoggedIn(true);
+
             userRepository.save(user);
+
+            AppUser userSaved = userRepository.findByUsername(request.getUser_name()).orElse(null);
+            Integer userId = userSaved != null ? userSaved.getId() : null;
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Create", "User", "app_user", userId,
+                    "User with " + request.getUser_name() + " username has been created successfully.",
+                    JsonBuilderUtils.jsonBuilder("{}"),
+                    JsonBuilderUtils.jsonBuilder(userSaved)
+            );
 
             return AuthResponse.builder()
                     .token(jwtService.getToken(user))

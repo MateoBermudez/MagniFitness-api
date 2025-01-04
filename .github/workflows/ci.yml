@@ -14,14 +14,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
         microservice:
-          - eureka-server
-          - api-gateway
-          - user-microservice
+          - name: eureka-server
+            envs: [] # No secrets needed
+          - name: api-gateway
+            envs:
+              - ADMIN_AUTH_URL
+              - INTERNAL_API_KEY
+          - name: user-microservice
+            envs:
+              - DB_URL
+              - DB_USERNAME
+              - DB_PASSWORD
+              - JWT_SECRET
+              - INTERNAL_API_KEY
+              - OAUTH2_GOOGLE_CLIENT_ID
+              - OAUTH2_GOOGLE_CLIENT_SECRET
+          - name: log-microservice
+            envs:
+              - DB_URL
+              - DB_USERNAME
+              - DB_PASSWORD
 
     steps:
       - name: Checkout code
@@ -31,10 +48,10 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
 
       - name: Cache Maven dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -50,14 +67,32 @@ jobs:
           sleep 10
 
       - name: Build microservice
+        env:
+          ADMIN_AUTH_URL: ${{ secrets.ADMIN_AUTH_URL }}
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          OAUTH2_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH2_GOOGLE_CLIENT_ID }}
+          OAUTH2_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH2_GOOGLE_CLIENT_SECRET }}
         run: |
-          cd ${{ matrix.microservice }}  
-          ./mvnw clean install             
+          cd ${{ matrix.microservice.name }}
+          ./mvnw clean install
 
       - name: Run tests
+        env:
+          ADMIN_AUTH_URL: ${{ secrets.ADMIN_AUTH_URL }}
+          INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          OAUTH2_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH2_GOOGLE_CLIENT_ID }}
+          OAUTH2_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH2_GOOGLE_CLIENT_SECRET }}
         run: |
-          cd ${{ matrix.microservice }}  
-          ./mvnw test                    
+          cd ${{ matrix.microservice.name }}
+          ./mvnw test
 
       - name: Stop H2 Database
         run: |

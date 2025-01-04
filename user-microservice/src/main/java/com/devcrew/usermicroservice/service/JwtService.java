@@ -6,6 +6,7 @@ import com.devcrew.usermicroservice.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class JwtService {
      *
      * @param userRepository the user repository
      */
+    @Autowired
     public JwtService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
