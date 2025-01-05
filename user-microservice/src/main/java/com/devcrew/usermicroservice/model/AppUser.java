@@ -143,6 +143,13 @@ public class AppUser implements UserDetails {
     String imageUri;
 
     /**
+     * The two-factor authentication secret key of the user.
+     */
+    @Column(name = "2fa_secret_key")
+    @JsonIgnore
+    String twoFactorAuthSecretKey;
+
+    /**
      * Constructor with parameters.
      *
      * @param username the username of the user

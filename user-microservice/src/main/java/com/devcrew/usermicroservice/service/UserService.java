@@ -444,4 +444,38 @@ public class UserService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+    /**
+     * Saves the 2FA secret key to the database.
+     * @param token the JWT token of the user doing the operation
+     * @param encryptedSecretKey the encrypted 2FA secret key
+     * @return the email of the user whose 2FA secret key was saved
+     */
+    @Transactional
+    public String update2FASecretKey(String token, String encryptedSecretKey) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        user.setTwoFactorAuthSecretKey(encryptedSecretKey);
+        return userRepository.save(user).getEmail();
+    }
+
+    /**
+     * Retrieves the 2FA secret key from the database.
+     * @param token the JWT token of the user doing the operation
+     * @return the 2FA secret key
+     */
+    public String get2FASecretKey(String token) {
+        return userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ).getTwoFactorAuthSecretKey();
+    }
+
+    public void updateUser2FAStatus(String token, boolean faStatus) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        user.setAuthenticated(faStatus);
+        userRepository.save(user);
+    }
 }

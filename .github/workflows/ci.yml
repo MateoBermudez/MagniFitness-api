@@ -34,6 +34,11 @@ jobs:
               - INTERNAL_API_KEY
               - OAUTH2_GOOGLE_CLIENT_ID
               - OAUTH2_GOOGLE_CLIENT_SECRET
+              - EMAIL_HOST
+              - EMAIL_PORT
+              - EMAIL_USERNAME
+              - EMAIL_PASSWORD
+              - ENCRYPTION_SECRET
           - name: log-microservice
             envs:
               - DB_URL

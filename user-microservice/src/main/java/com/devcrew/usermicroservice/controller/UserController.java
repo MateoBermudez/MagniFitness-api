@@ -40,7 +40,7 @@ public class UserController {
      */
     //Only admin can get all users
     @GetMapping(path = "/get-all")
-    public ResponseEntity<Object> getUsers(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<UserDTO>> getUsers(@RequestHeader("Authorization") String token) {
         List<UserDTO> users = userService.getUsers(token);
         return ResponseEntity.ok(users);
     }
@@ -54,7 +54,7 @@ public class UserController {
      */
     //Only admin can get the info of any user, and user can get his own info
     @GetMapping(path = "info/{username}")
-    public ResponseEntity<Object> getUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
+    public ResponseEntity<UserDTO> getUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         UserDTO user = userService.getUserInfo(token, username);
         return ResponseEntity.ok(user);
     }
@@ -68,7 +68,7 @@ public class UserController {
      */
     //Only admin can delete any user, and user can delete his own account
     @DeleteMapping(path = "delete/{username}")
-    public ResponseEntity<Object> deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
+    public ResponseEntity<Void> deleteUser(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.deleteUser(username, token);
         return ResponseEntity.noContent().build();
     }
@@ -83,7 +83,7 @@ public class UserController {
      */
     //Only admin can change the email of any user, and user can change his own email
     @PutMapping(path = "updateEmail/{username}")
-    public ResponseEntity<Object> updateUserEmail(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
+    public ResponseEntity<Void> updateUserEmail(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                   @RequestParam() String email) {
         userService.updateUserEmail(token, username, email);
         return ResponseEntity.noContent().build();
@@ -99,7 +99,7 @@ public class UserController {
      */
     //Only admin can change the username of any user, and user can change his own username
     @PutMapping(path = "updateUsername/{username}")
-    public ResponseEntity<Object> updateUserUsername(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
+    public ResponseEntity<Void> updateUserUsername(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                      @RequestParam() String newUsername) {
         userService.updateUserUsername(token, username, newUsername);
         return ResponseEntity.noContent().build();
@@ -115,7 +115,7 @@ public class UserController {
      */
     //Only admin can change the password of any user, and user can change his own password
     @PutMapping(path = "changePassword/{username}")
-    public ResponseEntity<Object> changePassword(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
+    public ResponseEntity<Void> changePassword(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                                  @RequestParam() String password) {
         userService.changeUserPassword(token, username, password);
         return ResponseEntity.noContent().build();
@@ -132,7 +132,7 @@ public class UserController {
      */
     //Only admin can change the role of any user
     @PutMapping(path = "changeRole/{username}")
-    public ResponseEntity<Object> changeRole(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
+    public ResponseEntity<Void> changeRole(@RequestHeader("Authorization") String token, @PathVariable("username") String username,
                                              @RequestParam() String role) {
         userService.changeUserRole(token, username, role);
         return ResponseEntity.noContent().build();
@@ -144,7 +144,7 @@ public class UserController {
      * @return A response entity indicating if the user is an admin.
      */
     @GetMapping(path = "validate-admin")
-    public ResponseEntity<Object> validateAdmin(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<Boolean> validateAdmin(@RequestHeader("Authorization") String token) {
         boolean isAdmin = userService.validateAdmin(token);
         return ResponseEntity.ok(isAdmin);
     }
@@ -155,7 +155,7 @@ public class UserController {
      * @return A response entity indicating that the user has been logged out.
      */
     @PostMapping("/logout/{username}")
-    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.logout(token, username);
         return ResponseEntity.noContent().build();
     }

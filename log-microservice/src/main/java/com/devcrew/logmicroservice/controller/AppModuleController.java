@@ -3,6 +3,7 @@ package com.devcrew.logmicroservice.controller;
 import com.devcrew.logmicroservice.dto.AppModuleDTO;
 import com.devcrew.logmicroservice.service.AppModuleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class AppModuleController {
      * @return ResponseEntity object with all modules.
      */
     @GetMapping("/get-modules")
-    public ResponseEntity<Object> getModules() {
+    public ResponseEntity<List<AppModuleDTO>> getModules() {
         List<AppModuleDTO> modules = appModuleService.getModules();
         return ResponseEntity.ok(modules);
     }
@@ -45,7 +46,7 @@ public class AppModuleController {
      * @return ResponseEntity object with the module.
      */
     @GetMapping("/get-module/{id}")
-    public ResponseEntity<Object> getModule(@PathVariable Integer id) {
+    public ResponseEntity<AppModuleDTO> getModule(@PathVariable Integer id) {
         AppModuleDTO module = appModuleService.getModule(id);
         return ResponseEntity.ok(module);
     }
@@ -56,9 +57,9 @@ public class AppModuleController {
      * @return ResponseEntity object with no content.
      */
     @PostMapping("/save-module")
-    public ResponseEntity<Object> saveModule(@RequestBody AppModuleDTO module){
+    public ResponseEntity<Void> saveModule(@RequestBody AppModuleDTO module){
         appModuleService.saveModule(module);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -67,7 +68,7 @@ public class AppModuleController {
      * @return ResponseEntity object with no content.
      */
     @DeleteMapping("/delete-module/{id}")
-    public ResponseEntity<Object> deleteModule(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteModule(@PathVariable Integer id) {
         appModuleService.deleteModule(id);
         return ResponseEntity.noContent().build();
     }
@@ -79,7 +80,7 @@ public class AppModuleController {
      * @return ResponseEntity object with no content, meaning the module is updated.
      */
     @PutMapping("/update-module/{id}")
-    public ResponseEntity<Object> updateModule(@PathVariable Integer id, @RequestBody String moduleName) {
+    public ResponseEntity<Void> updateModule(@PathVariable Integer id, @RequestBody String moduleName) {
         appModuleService.updateModule(id, moduleName);
         return ResponseEntity.noContent().build();
     }

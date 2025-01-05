@@ -5,6 +5,7 @@ import com.devcrew.logmicroservice.dto.LogEventFilter;
 import com.devcrew.logmicroservice.dto.PaginatedLogsResponse;
 import com.devcrew.logmicroservice.service.LogEventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Controller class for the LogEvent entity.
  * Handles the HTTP requests and responses.
- * Calls the LogEventService to perform the business logic.
+ * Call the LogEventService to perform the business logic.
  */
 @RestController
 @RequestMapping("/log")
@@ -38,7 +39,7 @@ public class LogEventController {
      * @return The list of all logs.
      */
     @GetMapping("/get-logs")
-    public ResponseEntity<Object> getLogs() {
+    public ResponseEntity<List<LogEventDTO>> getLogs() {
         List<LogEventDTO> logs = logEventService.getLogs();
         return ResponseEntity.ok(logs);
     }
@@ -52,7 +53,7 @@ public class LogEventController {
      * @return The paginated logs.
      */
     @GetMapping("/get-paginated-logs")
-    public ResponseEntity<Object> getPaginatedLogs(@RequestParam Integer page,
+    public ResponseEntity<PaginatedLogsResponse> getPaginatedLogs(@RequestParam Integer page,
                                                    @RequestParam Integer size,
                                                    @RequestBody LogEventFilter filter,
                                                    @RequestParam String sortDirection) {
@@ -66,7 +67,7 @@ public class LogEventController {
      * @return The log with the given id.
      */
     @GetMapping("/get-log/{id}")
-    public ResponseEntity<Object> getLog(@PathVariable Integer id) {
+    public ResponseEntity<LogEventDTO> getLog(@PathVariable Integer id) {
         LogEventDTO log = logEventService.getLog(id);
         return ResponseEntity.ok(log);
     }
@@ -79,9 +80,9 @@ public class LogEventController {
      */
     // Throws exception because of the JSON reading class
     @PostMapping("/save-log")
-    public ResponseEntity<Object> saveLog(@RequestBody String logEventJSON) throws Exception {
+    public ResponseEntity<Void> saveLog(@RequestBody String logEventJSON) throws Exception {
         logEventService.saveLogEvent(logEventJSON);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -90,7 +91,7 @@ public class LogEventController {
      * @return The response entity meaning the log is deleted.
      */
     @DeleteMapping("/delete-log/{id}")
-    public ResponseEntity<Object> deleteLog(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteLog(@PathVariable Integer id) {
         logEventService.deleteLog(id);
         return ResponseEntity.noContent().build();
     }
@@ -100,7 +101,7 @@ public class LogEventController {
      * @return The response entity meaning all the logs are deleted.
      */
     @DeleteMapping("/delete-logs")
-    public ResponseEntity<Object> deleteLogs() {
+    public ResponseEntity<Void> deleteLogs() {
         logEventService.deleteLogs();
         return ResponseEntity.noContent().build();
     }
