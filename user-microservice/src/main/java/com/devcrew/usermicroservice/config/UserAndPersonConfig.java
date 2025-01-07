@@ -93,6 +93,7 @@ public class UserAndPersonConfig {
                     null, adminRole, null
             );
 
+            user1.setLoggedIn(true);
             user1.setAuthenticated(true);
             user1.setTwoFactorAuthSecretKey("secret");
 
@@ -105,6 +106,7 @@ public class UserAndPersonConfig {
                     null, adminRole, null
             );
 
+            user2.setLoggedIn(true);
             user2.setAuthenticated(true);
             user2.setTwoFactorAuthSecretKey("secret");
 

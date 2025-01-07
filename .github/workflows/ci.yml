@@ -88,7 +88,7 @@ jobs:
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
         run: |
           cd ${{ matrix.microservice.name }}
-          ./mvnw clean install
+          ./mvnw clean install -DskipTests
 
       - name: Run tests
         env:
