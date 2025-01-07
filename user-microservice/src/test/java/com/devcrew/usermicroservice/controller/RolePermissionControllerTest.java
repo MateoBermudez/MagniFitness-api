@@ -70,11 +70,13 @@ public class RolePermissionControllerTest {
         AppUser user = new AppUser(
                 "Ma123",
                 "mariam@gmail.com",
-                false,
+                true,
                 LocalDate.now(),
                 LocalDate.now(),
                 null, new Role("ADMIN"), null
         );
+
+        user.setTwoFactorAuthSecretKey("secret");
 
         return (jwtService.getToken(user));
     }

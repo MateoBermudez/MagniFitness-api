@@ -34,10 +34,11 @@ public class ValidationUtils {
      * This method checks if the email is valid. If it's not valid, then it throws an exception.
      * @param email is the email to be checked.
      */
-    public static void isEmailValid(String email) {
+    public static boolean isEmailValid(String email) {
         if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
             throw new BadCredentialsException("Invalid email");
         }
+        return true;
     }
 
     /**
@@ -48,5 +49,15 @@ public class ValidationUtils {
      */
     public static boolean isLoginIdEmail(String loginId) {
         return loginId.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+    }
+
+    /**
+     * This method checks if the password is valid.
+     * The password must contain at least one digit, one lowercase letter, one uppercase letter, and no whitespace.
+     * @param password is the password to be checked.
+     * @return true if the password is valid, false otherwise.
+     */
+    public static boolean isPasswordValid(String password) {
+        return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$");
     }
 }

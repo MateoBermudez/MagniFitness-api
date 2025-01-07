@@ -136,6 +136,11 @@ public class AuthService {
                 throw new UserAlreadyExistsException("Email already exists");
             }
 
+            if (!ValidationUtils.isPasswordValid(request.getPassword())) {
+                throw new BadCredentialsException("Not secure password. \n" +
+                        "The password must contain at least one digit, one lowercase letter, one uppercase letter, and no whitespace.");
+            }
+
             Role defaultRole = roleRepository.findByName("USER").orElse(null);
 
             AppUser user = AppUser.builder()

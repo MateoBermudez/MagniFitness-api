@@ -100,7 +100,7 @@ public class AuthIntegrationTest {
                 {
                   "user_name": "Eldest",
                   "mail": "user@gmail.com",
-                  "password": "ThisIsAPassword",
+                  "password": "Mdkjvjdkj293845dmfkvj@@34!!",
                   "authenticated": false,
                   "person": {
                     "user_real_name": "Julian",
@@ -139,6 +139,7 @@ public class AuthIntegrationTest {
                 LocalDate.now(),
                 null, adminRole, null
         );
+        user1.setEnabled(true);
         AppPerson person1 = new AppPerson(
                 "Mariam",
                 "Gonzalez",

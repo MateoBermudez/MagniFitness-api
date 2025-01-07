@@ -83,6 +83,11 @@ public class JwtValidation {
      * @return String role is the role extracted from the token.
      */
     public String validateRoleFromToken(String token) {
+
+        if (invalidatedTokens.contains(token)) {
+            throw new BadCredentialsException("Invalid token");
+        }
+
         String tokenFin = token.substring(7); //Remove Bearer from token
         Claims claims = jwtService.getAllClaimsFromToken(tokenFin);
         return claims.get("role", String.class);

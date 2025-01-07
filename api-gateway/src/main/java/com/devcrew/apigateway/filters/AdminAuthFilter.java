@@ -87,8 +87,8 @@ public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilte
             );
             return response.getBody() != null && response.getBody();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return false;
+            System.err.println(e.getMessage());
+            throw new RuntimeException("Failed to authenticate admin: " + e.getMessage(), e);
         }
     }
 }

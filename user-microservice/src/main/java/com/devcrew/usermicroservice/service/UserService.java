@@ -471,11 +471,31 @@ public class UserService {
         ).getTwoFactorAuthSecretKey();
     }
 
+    /**
+     * Updates the 2FA status of a user. If the status is true, the user is authenticated.
+     * @param token the JWT token of the user doing the operation
+     * @param faStatus the 2FA status
+     */
     public void updateUser2FAStatus(String token, boolean faStatus) {
         AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
         );
-        user.setAuthenticated(faStatus);
+        try {
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
+            user.setAuthenticated(faStatus);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + user.getUsername() + " username has been authenticated successfully.",
+                    jsonBefore,
+                    JsonBuilderUtils.jsonBuilder(user)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         userRepository.save(user);
     }
 }

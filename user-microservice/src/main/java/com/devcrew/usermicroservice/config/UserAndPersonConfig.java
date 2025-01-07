@@ -93,6 +93,9 @@ public class UserAndPersonConfig {
                     null, adminRole, null
             );
 
+            user1.setAuthenticated(true);
+            user1.setTwoFactorAuthSecretKey("secret");
+
             AppUser user2 = new AppUser(
                     "Al123",
                     "alex@gmail.com",
@@ -101,6 +104,9 @@ public class UserAndPersonConfig {
                     LocalDate.now(),
                     null, adminRole, null
             );
+
+            user2.setAuthenticated(true);
+            user2.setTwoFactorAuthSecretKey("secret");
 
             user1.setHashed_password(new BCryptPasswordEncoder().encode("123"));
 
