@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Controller class for the LogEvent entity.
  * Handles the HTTP requests and responses.
- * Calls the LogEventService to perform the business logic.
+ * Call the LogEventService to perform the business logic.
  */
 @RestController
 @RequestMapping("/log")

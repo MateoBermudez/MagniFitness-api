@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -56,6 +57,12 @@ public class LogSenderService {
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 
         HttpEntity<String> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        try {
+            restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        } catch (RestClientException e) {
+            // Log the error; it's probably that the log service or api-gateway is down, if not, then api-key is wrong
+            System.err.println("Error while sending log: " + e.getMessage());
+            // Don't rethrow the exception, we don't want to interrupt the user's request
+        }
     }
 }

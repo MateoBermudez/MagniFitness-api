@@ -39,12 +39,11 @@ public class RolePermissionController {
     /**
      * This endpoint is used to get all the role-permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of role-permissions in the system.
      */
     @GetMapping(path = "/get-all")
-    public ResponseEntity<Object> getRolePermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRolePermissions(token));
+    public ResponseEntity<Object> getRolePermissions() {
+        return ResponseEntity.ok(rolePermissionService.getRolePermissions());
     }
 
     /**
@@ -125,23 +124,21 @@ public class RolePermissionController {
     /**
      * This endpoint is used to get all the roles in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of roles in the system.
      */
     @GetMapping(path = "get-roles")
-    public ResponseEntity<Object> getRoles(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRoles(token));
+    public ResponseEntity<Object> getRoles() {
+        return ResponseEntity.ok(rolePermissionService.getRoles());
     }
 
     /**
      * This endpoint is used to get all the permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of permissions in the system.
      */
     @GetMapping(path = "get-permissions")
-    public ResponseEntity<Object> getPermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getPermissions(token));
+    public ResponseEntity<Object> getPermissions() {
+        return ResponseEntity.ok(rolePermissionService.getPermissions());
     }
 
     /**
