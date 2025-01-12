@@ -18,6 +18,9 @@ import com.devcrew.logmicroservice.repository.ModuleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -71,6 +74,7 @@ public class LogEventService {
      * Method for getting all logs
      * @return List of LogEventDTO objects
      */
+    @Cacheable(value = "logs")
     public List<LogEventDTO> getLogs() {
         List<LogEvent> logs = logEventRepository.findAll();
         return logs.stream().map(LogEventMapper::toDTO).toList();
@@ -84,6 +88,7 @@ public class LogEventService {
      * @param sortDirection Sort direction
      * @return PaginatedLogsResponse object
      */
+    @Cacheable(value = "paginatedLogs")
     public PaginatedLogsResponse getPaginatedLogs(Integer page,
                                               Integer size,
                                               LogEventFilter filter,
@@ -231,6 +236,10 @@ public class LogEventService {
     /**
      * Method for deleting all logs from the database
      */
+    @Caching(evict = {
+            @CacheEvict(value = "logs", allEntries = true),
+            @CacheEvict(value = "paginatedLogs", allEntries = true)
+    })
     @Transactional
     public void deleteLogs() {
         logEventRepository.deleteAll();
