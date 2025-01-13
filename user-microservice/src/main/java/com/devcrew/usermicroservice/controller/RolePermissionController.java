@@ -41,12 +41,11 @@ public class RolePermissionController {
     /**
      * This endpoint is used to get all the role-permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of role-permissions in the system.
      */
     @GetMapping(path = "/get-all")
-    public ResponseEntity<List<RolePermissionDTO>> getRolePermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRolePermissions(token));
+    public ResponseEntity<List<RolePermissionDTO>> getRolePermissions() {
+        return ResponseEntity.ok(rolePermissionService.getRolePermissions());
     }
 
     /**
@@ -127,23 +126,21 @@ public class RolePermissionController {
     /**
      * This endpoint is used to get all the roles in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of roles in the system.
      */
     @GetMapping(path = "get-roles")
-    public ResponseEntity<List<RoleDTO>> getRoles(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRoles(token));
+    public ResponseEntity<List<RoleDTO>> getRoles() {
+        return ResponseEntity.ok(rolePermissionService.getRoles());
     }
 
     /**
      * This endpoint is used to get all the permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of permissions in the system.
      */
     @GetMapping(path = "get-permissions")
-    public ResponseEntity<List<PermissionDTO>> getPermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getPermissions(token));
+    public ResponseEntity<List<PermissionDTO>> getPermissions() {
+        return ResponseEntity.ok(rolePermissionService.getPermissions());
     }
 
     /**

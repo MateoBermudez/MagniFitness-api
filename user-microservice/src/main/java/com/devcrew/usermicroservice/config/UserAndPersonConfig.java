@@ -71,16 +71,16 @@ public class UserAndPersonConfig {
 
             rolePermissionRepository.saveAll(
                     List.of(
-                            new RolePermission(userRole, permission1, "READ permission for user"),
-                            new RolePermission(userRole, permission2, "CREATE permission for user"),
-                            new RolePermission(userRole, permission3, "DELETE permission for user"),
-                            new RolePermission(userRole, permission4, "UPDATE permission for user"),
-                            new RolePermission(adminRole, permission1, "READ permission for admin"),
-                            new RolePermission(adminRole, permission2, "CREATE permission for admin"),
-                            new RolePermission(adminRole, permission3, "DELETE permission for admin"),
-                            new RolePermission(adminRole, permission4, "UPDATE permission for admin"),
+                            new RolePermission(userRole, permission1, "CREATE permission for user"),
+                            new RolePermission(userRole, permission2, "READ permission for user"),
+                            new RolePermission(userRole, permission3, "UPDATE permission for user"),
+                            new RolePermission(userRole, permission4, "DELETE permission for user"),
+                            new RolePermission(adminRole, permission1, "CREATE permission for admin"),
+                            new RolePermission(adminRole, permission2, "READ permission for admin"),
+                            new RolePermission(adminRole, permission3, "UPDATE permission for admin"),
+                            new RolePermission(adminRole, permission4, "DELETE permission for admin"),
                             new RolePermission(adminRole, permission5, "ADMIN permission for admin"),
-                            new RolePermission(adminRole, permission6, "FULL permission for admin")
+                            new RolePermission(adminRole, permission6, "FULL_ACCESS permission for admin")
                     )
             );
 

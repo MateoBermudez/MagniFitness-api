@@ -6,13 +6,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * RolePermissionDTO is a class used to create a data transfer object for the role_permission entity.
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RolePermissionDTO {
+public class RolePermissionDTO implements Serializable {
+    @Serial
+    private final static long serialVersionUID = 1L;
     /**
      * The identifier field is used to store the identifier of the role_permission.
      */

@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Permission entity represents a permission that a user can have.
  */
@@ -21,7 +24,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Permission {
+public class Permission implements Serializable {
+    @Serial
+    private final static long serialVersionUID = 1L;
 
     /**
      * The unique identifier of the permission.

@@ -91,7 +91,6 @@ public class UserService {
      * @return a list of UserDTO objects containing the user's information
      */
     public List<UserDTO> getUsers(String token) {
-        validateAdminPermissions(token);
         return userRepository.findAll().stream().map(UserMapper::toDTO).toList();
     }
 
@@ -260,7 +259,6 @@ public class UserService {
     @Transactional
     public void changeUserRole(String token, String username, String roleInput) {
         try {
-            validateAdminPermissions(token);
             AppUser user = userRepository.findByUsername(username).orElseThrow(
                     () -> new UserDoesNotExistException("User does not exist")
             );
@@ -341,17 +339,8 @@ public class UserService {
      *
      * @param token the JWT token of the user doing the operation
      */
-    private boolean validateAdminPermissions(String token) {
-        return (AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository));
-    }
-
-    /**
-     * Validates if the user has admin permissions.
-     *
-     * @param token the JWT token of the user doing the operation
-     */
     public boolean validateAdmin(String token) {
-        return validateAdminPermissions(token);
+        return AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
     }
 
 

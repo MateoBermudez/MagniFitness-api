@@ -73,7 +73,6 @@ public class PersonService {
      * @return a list of PersonDTO objects with information about each person
      */
     public List<PersonDTO> getPeople(String token) {
-        validateAdminPermissions(token);
         return personRepository.findAll().stream().map(PersonMapper::toDTO).toList();
     }
 
@@ -158,7 +157,6 @@ public class PersonService {
     @Transactional
     public void deletePerson(String token, Integer id) {
         try {
-            validateAdminPermissions(token);
             AppPerson person = personRepository.findById(id).orElseThrow(
                     () -> new UserDoesNotExistException("User does not exist")
             );
@@ -192,15 +190,6 @@ public class PersonService {
     private AppPerson validatePermissions(String username, String token, String permissionNeeded) {
         AppUser user = AuthorizationUtils.validatePermissions(username, token, permissionNeeded, jwtValidation, userRepository, rolePermissionRepository);
         return user.getAppPerson();
-    }
-
-    /**
-     * Validates if the user has admin of full access permissions.
-     *
-     * @param token the JWT token of the user making the request
-     */
-    private void validateAdminPermissions(String token) {
-        AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
     }
 
     /**

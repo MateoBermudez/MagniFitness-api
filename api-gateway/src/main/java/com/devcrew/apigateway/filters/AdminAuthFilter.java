@@ -53,7 +53,7 @@ public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilte
                 if (!isAdmin) {
                     exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                     exchange.getResponse().getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap("{\"error\": \"Unauthorized access\"}".getBytes());
+                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap("{\"error\": \"Unauthorized access. You are not an admin.\"}".getBytes());
                     return exchange.getResponse().writeWith(Mono.just(buffer));
                 }
                 return chain.filter(exchange);
