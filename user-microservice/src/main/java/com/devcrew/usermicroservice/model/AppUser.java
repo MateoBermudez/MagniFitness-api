@@ -78,8 +78,6 @@ public class AppUser implements UserDetails {
     @JsonIgnore
     private String hashed_password;
 
-//    Two-step verification later
-
     /**
      * The authentication status of the user.
      */
@@ -141,6 +139,13 @@ public class AppUser implements UserDetails {
     @Column(name = "image_uri")
     @JsonIgnore
     String imageUri;
+
+    /**
+     * The two-factor authentication secret key of the user.
+     */
+    @Column(name = "2fa_secret_key")
+    @JsonIgnore
+    String twoFactorAuthSecretKey;
 
     /**
      * Constructor with parameters.
@@ -225,11 +230,20 @@ public class AppUser implements UserDetails {
     /**
      * Overridden method of the UserDetails interface.
      * isEnabled method.
-     * @return true for all users
+     * @return the enabled status of the user
      */
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return enabled;
+    }
+
+    /**
+     * Method to check if the user has two-factor authentication enabled.
+     * @return true if the user has two-factor authentication enabled
+     */
+    @JsonIgnore
+    public boolean hasTwoFactorAuth() {
+        return twoFactorAuthSecretKey != null && authenticated;
     }
 }

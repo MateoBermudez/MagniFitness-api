@@ -36,7 +36,7 @@ public class AuthController {
      * @return The ResponseEntity object that contains the AuthResponse object, which contains the JWT token.
      */
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
@@ -51,7 +51,7 @@ public class AuthController {
      * @return The ResponseEntity object that contains the AuthResponse object, which contains the JWT token.
      */
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }

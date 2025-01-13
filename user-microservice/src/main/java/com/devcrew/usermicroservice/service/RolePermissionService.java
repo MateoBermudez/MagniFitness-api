@@ -16,11 +16,13 @@ import com.devcrew.usermicroservice.repository.PermissionRepository;
 import com.devcrew.usermicroservice.repository.RolePermissionRepository;
 import com.devcrew.usermicroservice.repository.RoleRepository;
 import com.devcrew.usermicroservice.repository.UserRepository;
-import com.devcrew.usermicroservice.utils.AuthorizationUtils;
 import com.devcrew.usermicroservice.utils.JsonBuilderUtils;
 import com.devcrew.usermicroservice.utils.JwtValidation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -85,11 +87,11 @@ public class RolePermissionService {
     /**
      * Retrieves all role permissions.
      *
-     * @param token the JWT token of the user requesting the role permissions
      * @return a list of RolePermissionDTO
      */
-    public List<RolePermissionDTO> getRolePermissions(String token) {
-        AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
+    // It's not working globally, only for the first call
+    @Cacheable(value = "rolePermissions")
+    public List<RolePermissionDTO> getRolePermissions() {
         return rolePermissionRepository.findAll().stream().map(RolePermissionMapper::toDTO).toList();
     }
 
@@ -99,11 +101,10 @@ public class RolePermissionService {
      * @param token the JWT token of the user requesting the deletion
      * @param id the ID of the role permission to be deleted in the database
      */
+    @CacheEvict(value = "rolePermissions", allEntries = true)
     @Transactional
     public void deleteRolePermission(String token, Integer id) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -136,11 +137,10 @@ public class RolePermissionService {
      * @param token the JWT token of the user adding the role permission
      * @param rolePermission the role permission DTO to be added to the database
      */
+    @CacheEvict(value = "rolePermissions", allEntries = true)
     @Transactional
     public void addRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -171,11 +171,10 @@ public class RolePermissionService {
      * @param token the JWT token of the user updating the role permission
      * @param rolePermission the role permission DTO to be updated in the database
      */
+    @CacheEvict(value = "rolePermissions", allEntries = true)
     @Transactional
     public void updateRolePermission(String token, RolePermissionDTO rolePermission) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -215,7 +214,6 @@ public class RolePermissionService {
      */
     public RolePermissionDTO getRolePermission(String token, Integer id) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             RolePermission rolePermission = rolePermissionRepository.findById(id).orElseThrow(
                     () -> new BadRequestException("Role not found")
             );
@@ -236,7 +234,6 @@ public class RolePermissionService {
      */
     public List<PermissionDTO> getPermissionsByRole(String token, Integer roleId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             List<Permission> permissions = rolePermissionRepository.findByRole(roleId);
             return permissions.stream().map(PermissionMapper::toDTO).toList();
         } catch (CustomException ex) {
@@ -255,7 +252,6 @@ public class RolePermissionService {
      */
     public List<RoleDTO> getRolesByPermission(String token, Integer permissionId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             List<Role> roles = rolePermissionRepository.findByPermission(permissionId);
             return roles.stream().map(RoleMapper::toDTO).toList();
         } catch (CustomException ex) {
@@ -268,12 +264,11 @@ public class RolePermissionService {
     /**
      * Retrieves all roles.
      *
-     * @param token the JWT token of the user requesting the roles
      * @return a list of RoleDTO with all roles
      */
-    public List<RoleDTO> getRoles(String token) {
+    @Cacheable(value = "roles")
+    public List<RoleDTO> getRoles() {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             return roleRepository.findAll().stream().map(RoleMapper::toDTO).toList();
         } catch (CustomException ex) {
             throw new CustomException("Error getting roles\n" + ex.getMessage());
@@ -285,12 +280,11 @@ public class RolePermissionService {
     /**
      * Retrieves all permissions.
      *
-     * @param token the JWT token of the user requesting the permissions
      * @return a list of PermissionDTO with all permissions
      */
-    public List<PermissionDTO> getPermissions(String token) {
+    @Cacheable(value = "permissions")
+    public List<PermissionDTO> getPermissions() {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             return permissionRepository.findAll().stream().map(PermissionMapper::toDTO).toList();
         } catch (CustomException ex) {
             throw new CustomException("Error getting permissions\n" + ex.getMessage());
@@ -305,11 +299,14 @@ public class RolePermissionService {
      * @param token the JWT token of the user requesting the deletion
      * @param roleId the ID of the role to be deleted in the database
      */
+
+    @Caching(evict = {
+            @CacheEvict(value = "roles", allEntries = true),
+            @CacheEvict(value = "rolePermissions", allEntries = true)
+    })
     @Transactional
     public void deleteRole(String token, Integer roleId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -351,11 +348,13 @@ public class RolePermissionService {
      * @param token the JWT token of the user requesting the deletion
      * @param permissionId the ID of the permission to be deleted in the database
      */
+    @Caching(evict = {
+            @CacheEvict(value = "permissions", allEntries = true),
+            @CacheEvict(value = "rolePermissions", allEntries = true)
+    })
     @Transactional
     public void deletePermission(String token, Integer permissionId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -397,11 +396,10 @@ public class RolePermissionService {
      * @param token the JWT token of the user adding the role
      * @param role the role DTO to be added to the database
      */
+    @CacheEvict(value = "roles", allEntries = true)
     @Transactional
     public void addRole(String token, RoleDTO role) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -432,11 +430,10 @@ public class RolePermissionService {
      * @param token the JWT token of the user adding the permission
      * @param permission the permission DTO to be added to the database
      */
+    @CacheEvict(value = "permissions", allEntries = true)
     @Transactional
     public void addPermission(String token, PermissionDTO permission) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -468,11 +465,13 @@ public class RolePermissionService {
      * @param token the JWT token of the user updating the role
      * @param role the role DTO to be updated in the database
      */
+    @Caching(evict = {
+            @CacheEvict(value = "roles", allEntries = true),
+            @CacheEvict(value = "rolePermissions", allEntries = true)
+    })
     @Transactional
     public void updateRole(String token, RoleDTO role) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -511,11 +510,13 @@ public class RolePermissionService {
      * @param token the JWT token of the user updating the permission
      * @param permission the permission DTO to be updated in the database
      */
+    @Caching(evict = {
+            @CacheEvict(value = "permissions", allEntries = true),
+            @CacheEvict(value = "rolePermissions", allEntries = true)
+    })
     @Transactional
     public void updatePermission(String token, PermissionDTO permission) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
-
             String username = jwtValidation.validateUsernameFromToken(token);
 
             AppUser user = userRepository.findByUsername(username).orElseThrow(
@@ -556,7 +557,6 @@ public class RolePermissionService {
      */
     public RoleDTO getRole(String token, Integer roleId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             Role role = roleRepository.findById(roleId).orElseThrow(
                     () -> new BadRequestException("Role not found")
             );
@@ -577,7 +577,6 @@ public class RolePermissionService {
      */
     public PermissionDTO getPermission(String token, Integer permissionId) {
         try {
-            AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
             Permission permission = permissionRepository.findById(permissionId).orElseThrow(
                     () -> new BadRequestException("Permission not found")
             );

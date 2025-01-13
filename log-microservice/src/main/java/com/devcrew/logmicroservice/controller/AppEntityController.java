@@ -3,6 +3,7 @@ package com.devcrew.logmicroservice.controller;
 import com.devcrew.logmicroservice.dto.AppEntityDTO;
 import com.devcrew.logmicroservice.service.AppEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,7 +36,7 @@ public class AppEntityController {
      * @return The list of all the entities.
      */
     @GetMapping("/get-entities")
-    public ResponseEntity<Object> getEntities() {
+    public ResponseEntity<List<AppEntityDTO>> getEntities() {
         List<AppEntityDTO> entities = appEntityService.getEntities();
         return ResponseEntity.ok(entities);
     }
@@ -46,7 +47,7 @@ public class AppEntityController {
      * @return The entity with the given id.
      */
     @GetMapping("/get-entity/{id}")
-    public ResponseEntity<Object> getEntity(@PathVariable Integer id) {
+    public ResponseEntity<AppEntityDTO> getEntity(@PathVariable Integer id) {
         AppEntityDTO entity = appEntityService.getEntity(id);
         return ResponseEntity.ok(entity);
     }
@@ -57,7 +58,7 @@ public class AppEntityController {
      * @return The entity with the given name.
      */
     @GetMapping("/get-entity-by-name/{name}")
-    public ResponseEntity<Object> getEntityByName(@PathVariable String name) {
+    public ResponseEntity<AppEntityDTO> getEntityByName(@PathVariable String name) {
         AppEntityDTO entity = appEntityService.getEntityByName(name);
         return ResponseEntity.ok(entity);
     }
@@ -68,9 +69,9 @@ public class AppEntityController {
      * @return The response entity.
      */
     @PostMapping("/save-entity")
-    public ResponseEntity<Object> saveEntity(@RequestBody AppEntityDTO entity){
+    public ResponseEntity<Void> saveEntity(@RequestBody AppEntityDTO entity){
         appEntityService.saveEntity(entity);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -79,7 +80,7 @@ public class AppEntityController {
      * @return The response entity.
      */
     @DeleteMapping("/delete-entity/{id}")
-    public ResponseEntity<Object> deleteEntity(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteEntity(@PathVariable Integer id) {
         appEntityService.deleteEntity(id);
         return ResponseEntity.noContent().build();
     }
@@ -91,7 +92,7 @@ public class AppEntityController {
      * @return The response entity.
      */
     @PutMapping("/update-entity/{id}")
-    public ResponseEntity<Object> updateEntity(@PathVariable Integer id, @RequestBody String entityName) {
+    public ResponseEntity<Void> updateEntity(@PathVariable Integer id, @RequestBody String entityName) {
         appEntityService.updateEntity(id, entityName);
         return ResponseEntity.noContent().build();
     }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -70,11 +71,13 @@ public class RolePermissionControllerTest {
         AppUser user = new AppUser(
                 "Ma123",
                 "mariam@gmail.com",
-                false,
+                true,
                 LocalDate.now(),
                 LocalDate.now(),
                 null, new Role("ADMIN"), null
         );
+
+        user.setTwoFactorAuthSecretKey("secret");
 
         return (jwtService.getToken(user));
     }

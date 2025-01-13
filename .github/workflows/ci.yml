@@ -34,6 +34,11 @@ jobs:
               - INTERNAL_API_KEY
               - OAUTH2_GOOGLE_CLIENT_ID
               - OAUTH2_GOOGLE_CLIENT_SECRET
+              - EMAIL_HOST
+              - EMAIL_PORT
+              - EMAIL_USERNAME
+              - EMAIL_PASSWORD
+              - ENCRYPTION_SECRET
           - name: log-microservice
             envs:
               - DB_URL
@@ -76,9 +81,14 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OAUTH2_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH2_GOOGLE_CLIENT_ID }}
           OAUTH2_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH2_GOOGLE_CLIENT_SECRET }}
+          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
         run: |
           cd ${{ matrix.microservice.name }}
-          ./mvnw clean install
+          ./mvnw clean install -DskipTests
 
       - name: Run tests
         env:
@@ -90,6 +100,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           OAUTH2_GOOGLE_CLIENT_ID: ${{ secrets.OAUTH2_GOOGLE_CLIENT_ID }}
           OAUTH2_GOOGLE_CLIENT_SECRET: ${{ secrets.OAUTH2_GOOGLE_CLIENT_SECRET }}
+          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
         run: |
           cd ${{ matrix.microservice.name }}
           ./mvnw test

@@ -91,7 +91,6 @@ public class UserService {
      * @return a list of UserDTO objects containing the user's information
      */
     public List<UserDTO> getUsers(String token) {
-        validateAdminPermissions(token);
         return userRepository.findAll().stream().map(UserMapper::toDTO).toList();
     }
 
@@ -260,7 +259,6 @@ public class UserService {
     @Transactional
     public void changeUserRole(String token, String username, String roleInput) {
         try {
-            validateAdminPermissions(token);
             AppUser user = userRepository.findByUsername(username).orElseThrow(
                     () -> new UserDoesNotExistException("User does not exist")
             );
@@ -341,17 +339,8 @@ public class UserService {
      *
      * @param token the JWT token of the user doing the operation
      */
-    private boolean validateAdminPermissions(String token) {
-        return (AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository));
-    }
-
-    /**
-     * Validates if the user has admin permissions.
-     *
-     * @param token the JWT token of the user doing the operation
-     */
     public boolean validateAdmin(String token) {
-        return validateAdminPermissions(token);
+        return AuthorizationUtils.validateAdminPermissions(token, jwtValidation, userRepository, rolePermissionRepository);
     }
 
 
@@ -443,5 +432,86 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    /**
+     * Saves the 2FA secret key to the database.
+     * @param token the JWT token of the user doing the operation
+     * @param encryptedSecretKey the encrypted 2FA secret key
+     * @return the email of the user whose 2FA secret key was saved
+     */
+    @Transactional
+    public String update2FASecretKey(String token, String encryptedSecretKey) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        user.setTwoFactorAuthSecretKey(encryptedSecretKey);
+        return userRepository.save(user).getEmail();
+    }
+
+    /**
+     * Retrieves the 2FA secret key from the database.
+     * @param token the JWT token of the user doing the operation
+     * @return the 2FA secret key
+     */
+    public String get2FASecretKey(String token) {
+        return userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ).getTwoFactorAuthSecretKey();
+    }
+
+    /**
+     * Updates the 2FA status of a user. If the status is true, the user is authenticated.
+     * @param token the JWT token of the user doing the operation
+     * @param faStatus the 2FA status
+     */
+    @Transactional
+    public void updateUser2FAStatus(String token, boolean faStatus) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        try {
+            String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
+
+            user.setAuthenticated(faStatus);
+
+            logSenderService.sendLog(
+                    null, null, null,
+                    "Update", "User", "app_user", user.getId(),
+                    "User with " + user.getUsername() + " username has been authenticated successfully.",
+                    jsonBefore,
+                    JsonBuilderUtils.jsonBuilder(user)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        userRepository.save(user);
+    }
+
+    /**
+     * Resets the 2FA status of a user. Used for sensitive operations and to check the user's identity.
+     * @param token the JWT token of the user doing the operation
+     * @param faStatus the 2FA status to reset to
+     */
+    @Transactional
+    public void reset2FA(String token, boolean faStatus) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        user.setAuthenticated(faStatus); // Normally, this should be false
+        user.setTwoFactorAuthSecretKey(null); // Reset the 2FA secret key
+        userRepository.save(user);
+    }
+
+    /**
+     * Retrieves the user information from a valid token.
+     * @param token the JWT token of the user making the request
+     * @return a UserDTO object with information about the user
+     */
+    public UserDTO getUserFromValidToken(String token) {
+        return UserMapper.toDTO(userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ));
     }
 }

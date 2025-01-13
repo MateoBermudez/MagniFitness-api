@@ -41,7 +41,7 @@ public class PersonController {
      */
     //Only admin can get all-people information
     @GetMapping(path = "/get-all")
-    public ResponseEntity<Object> getPeople(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<PersonDTO>> getPeople(@RequestHeader("Authorization") String token) {
         List<PersonDTO> people = personService.getPeople(token);
         return ResponseEntity.ok(people);
     }
@@ -55,7 +55,7 @@ public class PersonController {
     //User is null, to make user not null, they use the authentication controller -> Register into the system
     //Only admin can get the information of any person, and user can get his own information
     @GetMapping(path = "/info/{username}")
-    public ResponseEntity<Object> getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
+    public ResponseEntity<PersonDTO> getPerson(@RequestHeader("Authorization") String token, @PathVariable String username) {
         PersonDTO person = personService.getPerson(token, username);
         return ResponseEntity.ok(person);
     }
@@ -67,7 +67,7 @@ public class PersonController {
      */
     //Any user can add a new person without any restrictions -> Add restrictions if needed; This endpoint needs revision
     @PostMapping(path = "/add")
-    public ResponseEntity<Object> addPerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<Void> addPerson(@RequestBody PersonDTO personDTO) {
         personService.addPerson(personDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -81,7 +81,7 @@ public class PersonController {
      */
     //Only admin can update any person's information, and a user can update their own information
     @PutMapping(path = "/update/{username}")
-    public ResponseEntity<Object> updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
+    public ResponseEntity<Void> updatePersonInformation(@RequestHeader("Authorization") String token, @RequestBody PersonDTO personDTO, @PathVariable String username) {
         personService.updatePersonInfo(token, personDTO, username);
         return ResponseEntity.noContent().build();
     }
@@ -94,8 +94,19 @@ public class PersonController {
      */
     //Only admin can delete any person
     @DeleteMapping(path = "/delete/{id}")
-    public ResponseEntity<Object> deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<Void> deletePerson(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
         personService.deletePerson(token, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * This endpoint is used to get the information of a person from a valid token.
+     * @param token The token of the user making the request.
+     * @return A response entity containing the information of the person.
+     */
+    @GetMapping(path = "/get-from-valid-token")
+    public ResponseEntity<PersonDTO> getPersonFromValidToken(@RequestHeader("Authorization") String token) {
+        PersonDTO person = personService.getPersonFromValidToken(token);
+        return ResponseEntity.ok(person);
     }
 }
