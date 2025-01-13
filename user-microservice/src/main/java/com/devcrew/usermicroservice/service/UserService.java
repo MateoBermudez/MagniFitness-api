@@ -476,6 +476,7 @@ public class UserService {
      * @param token the JWT token of the user doing the operation
      * @param faStatus the 2FA status
      */
+    @Transactional
     public void updateUser2FAStatus(String token, boolean faStatus) {
         AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
                 () -> new UserDoesNotExistException("User does not exist")
@@ -497,5 +498,31 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    /**
+     * Resets the 2FA status of a user. Used for sensitive operations and to check the user's identity.
+     * @param token the JWT token of the user doing the operation
+     * @param faStatus the 2FA status to reset to
+     */
+    @Transactional
+    public void reset2FA(String token, boolean faStatus) {
+        AppUser user = userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        );
+        user.setAuthenticated(faStatus); // Normally, this should be false
+        user.setTwoFactorAuthSecretKey(null); // Reset the 2FA secret key
+        userRepository.save(user);
+    }
+
+    /**
+     * Retrieves the user information from a valid token.
+     * @param token the JWT token of the user making the request
+     * @return a UserDTO object with information about the user
+     */
+    public UserDTO getUserFromValidToken(String token) {
+        return UserMapper.toDTO(userRepository.findByUsername(jwtValidation.validateUsernameFromToken(token)).orElseThrow(
+                () -> new UserDoesNotExistException("User does not exist")
+        ));
     }
 }

@@ -98,4 +98,15 @@ public class PersonController {
         personService.deletePerson(token, id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * This endpoint is used to get the information of a person from a valid token.
+     * @param token The token of the user making the request.
+     * @return A response entity containing the information of the person.
+     */
+    @GetMapping(path = "/get-from-valid-token")
+    public ResponseEntity<PersonDTO> getPersonFromValidToken(@RequestHeader("Authorization") String token) {
+        PersonDTO person = personService.getPersonFromValidToken(token);
+        return ResponseEntity.ok(person);
+    }
 }

@@ -37,4 +37,10 @@ public class TwoFactorAuthController {
         userService.updateUser2FAStatus(token, true);
         return ResponseEntity.ok(true);
     }
+
+    @PostMapping("/reset-2fa")
+    public ResponseEntity<String> reset2FA(@RequestHeader("Authorization") String token) {
+        userService.reset2FA(token, false);
+        return ResponseEntity.ok("2FA reset successfully");
+    }
 }

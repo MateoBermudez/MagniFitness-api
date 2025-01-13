@@ -154,9 +154,20 @@ public class UserController {
      * @param token The token of the user making the request.
      * @return A response entity indicating that the user has been logged out.
      */
-    @PostMapping("/logout/{username}")
+    @PostMapping(path = "/logout/{username}")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token, @PathVariable("username") String username) {
         userService.logout(token, username);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * This endpoint is used to get the user from a valid token.
+     * @param token The token of the user making the request.
+     * @return A response entity containing the information of the user.
+     */
+    @GetMapping(path = "/get-from-valid-token")
+    public ResponseEntity<UserDTO> getUserFromValidToken(@RequestHeader("Authorization") String token) {
+        UserDTO user = userService.getUserFromValidToken(token);
+        return ResponseEntity.ok(user);
     }
 }
