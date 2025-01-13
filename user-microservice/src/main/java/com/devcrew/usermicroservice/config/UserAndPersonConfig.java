@@ -71,16 +71,16 @@ public class UserAndPersonConfig {
 
             rolePermissionRepository.saveAll(
                     List.of(
-                            new RolePermission(userRole, permission1, "READ permission for user"),
-                            new RolePermission(userRole, permission2, "CREATE permission for user"),
-                            new RolePermission(userRole, permission3, "DELETE permission for user"),
-                            new RolePermission(userRole, permission4, "UPDATE permission for user"),
-                            new RolePermission(adminRole, permission1, "READ permission for admin"),
-                            new RolePermission(adminRole, permission2, "CREATE permission for admin"),
-                            new RolePermission(adminRole, permission3, "DELETE permission for admin"),
-                            new RolePermission(adminRole, permission4, "UPDATE permission for admin"),
+                            new RolePermission(userRole, permission1, "CREATE permission for user"),
+                            new RolePermission(userRole, permission2, "READ permission for user"),
+                            new RolePermission(userRole, permission3, "UPDATE permission for user"),
+                            new RolePermission(userRole, permission4, "DELETE permission for user"),
+                            new RolePermission(adminRole, permission1, "CREATE permission for admin"),
+                            new RolePermission(adminRole, permission2, "READ permission for admin"),
+                            new RolePermission(adminRole, permission3, "UPDATE permission for admin"),
+                            new RolePermission(adminRole, permission4, "DELETE permission for admin"),
                             new RolePermission(adminRole, permission5, "ADMIN permission for admin"),
-                            new RolePermission(adminRole, permission6, "FULL permission for admin")
+                            new RolePermission(adminRole, permission6, "FULL_ACCESS permission for admin")
                     )
             );
 
@@ -93,6 +93,10 @@ public class UserAndPersonConfig {
                     null, adminRole, null
             );
 
+            user1.setLoggedIn(true);
+            user1.setAuthenticated(true);
+            user1.setTwoFactorAuthSecretKey("secret");
+
             AppUser user2 = new AppUser(
                     "Al123",
                     "alex@gmail.com",
@@ -101,6 +105,10 @@ public class UserAndPersonConfig {
                     LocalDate.now(),
                     null, adminRole, null
             );
+
+            user2.setLoggedIn(true);
+            user2.setAuthenticated(true);
+            user2.setTwoFactorAuthSecretKey("secret");
 
             user1.setHashed_password(new BCryptPasswordEncoder().encode("123"));
 

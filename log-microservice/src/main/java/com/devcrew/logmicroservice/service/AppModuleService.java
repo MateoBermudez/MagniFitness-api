@@ -6,6 +6,8 @@ import com.devcrew.logmicroservice.model.AppModule;
 import com.devcrew.logmicroservice.repository.ModuleRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +37,7 @@ public class AppModuleService {
      * Get all modules.
      * @return List of modules
      */
+    @Cacheable(value = "modules")
     public List<AppModuleDTO> getModules() {
         List<AppModule> Modules = ModuleRepository.findAll();
         return Modules.stream().map(AppModuleMapper::toDTO).toList();
@@ -56,6 +59,7 @@ public class AppModuleService {
      * Saves module to the database.
      * @param module Module to save
      */
+    @CacheEvict(value = "modules", allEntries = true)
     @Transactional
     public void saveModule(AppModuleDTO module) {
         AppModule Module = AppModuleMapper.toEntity(module);
@@ -66,6 +70,7 @@ public class AppModuleService {
      * Deletes module from the database with specified id.
      * @param id Module id to delete
      */
+    @CacheEvict(value = "modules", allEntries = true)
     @Transactional
     public void deleteModule(Integer id) {
         ModuleRepository.findById(id).orElseThrow(
@@ -79,6 +84,8 @@ public class AppModuleService {
      * @param id Module id
      * @param moduleName New module name
      */
+    @CacheEvict(value = "modules", allEntries = true)
+    @Transactional
     public void updateModule(Integer id, String moduleName) {
         AppModule Module = ModuleRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Module with id " + id + " not found")

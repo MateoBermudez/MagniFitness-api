@@ -3,6 +3,7 @@ package com.devcrew.logmicroservice.controller;
 import com.devcrew.logmicroservice.dto.ActionDTO;
 import com.devcrew.logmicroservice.service.ActionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class ActionController {
      * @return The list of all the actions.
      */
     @GetMapping("/get-actions")
-    public ResponseEntity<Object> getActions() {
+    public ResponseEntity<List<ActionDTO>> getActions() {
         List<ActionDTO> actions = actionService.getActions();
         return ResponseEntity.ok(actions);
     }
@@ -45,7 +46,7 @@ public class ActionController {
      * @return The action with the given id.
      */
     @GetMapping("/get-action-by-id/{id}")
-    public ResponseEntity<Object> getActionById(@PathVariable Integer id) {
+    public ResponseEntity<ActionDTO> getActionById(@PathVariable Integer id) {
         ActionDTO action = actionService.getActionById(id);
         return ResponseEntity.ok(action);
     }
@@ -56,9 +57,9 @@ public class ActionController {
      * @return The response entity.
      */
     @PostMapping("/add-action")
-    public ResponseEntity<Object> addAction(ActionDTO actionDTO) {
+    public ResponseEntity<Void> addAction(ActionDTO actionDTO) {
         actionService.addAction(actionDTO);
-        return ResponseEntity.ok("Action added successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
@@ -67,9 +68,9 @@ public class ActionController {
      * @return The response entity.
      */
     @DeleteMapping("/delete-action/{id}")
-    public ResponseEntity<Object> deleteAction(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteAction(@PathVariable Integer id) {
         actionService.deleteAction(id);
-        return ResponseEntity.ok("Action deleted successfully");
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -79,7 +80,7 @@ public class ActionController {
      * @return The response entity.
      */
     @PutMapping("/update-action/{id}")
-    public ResponseEntity<Object> updateAction(@PathVariable Integer id, @RequestBody String actionName) {
+    public ResponseEntity<Void> updateAction(@PathVariable Integer id, @RequestBody String actionName) {
         actionService.updateAction(id, actionName);
         return ResponseEntity.noContent().build();
     }

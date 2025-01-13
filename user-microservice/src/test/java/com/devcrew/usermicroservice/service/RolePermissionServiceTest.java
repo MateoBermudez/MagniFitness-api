@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ActiveProfiles("test")
 @SpringBootTest
-@Import(UserAndPersonConfig.class)
+@Import({UserAndPersonConfig.class})
 public class RolePermissionServiceTest {
 
     /**
@@ -48,8 +48,7 @@ public class RolePermissionServiceTest {
      */
     @Test
     public void testGetRolePermissions() {
-        String token = getToken();
-        List<RolePermissionDTO> rolePermissionDTOList = rolePermissionService.getRolePermissions("Bearer " + token);
+        List<RolePermissionDTO> rolePermissionDTOList = rolePermissionService.getRolePermissions();
 
         assertNotNull(rolePermissionDTOList);
         assertFalse(rolePermissionDTOList.isEmpty());

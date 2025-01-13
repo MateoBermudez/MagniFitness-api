@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * This class is the controller class for the RolePermission entity.
  * It contains the endpoints for the RolePermission entity, Role entity, and Permission entity.
@@ -39,12 +41,11 @@ public class RolePermissionController {
     /**
      * This endpoint is used to get all the role-permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of role-permissions in the system.
      */
     @GetMapping(path = "/get-all")
-    public ResponseEntity<Object> getRolePermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRolePermissions(token));
+    public ResponseEntity<List<RolePermissionDTO>> getRolePermissions() {
+        return ResponseEntity.ok(rolePermissionService.getRolePermissions());
     }
 
     /**
@@ -55,7 +56,7 @@ public class RolePermissionController {
      * @return A response entity containing the information of the role-permission.
      */
     @GetMapping(path = "/get/{id}")
-    public ResponseEntity<Object> getRolePermission(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<RolePermissionDTO> getRolePermission(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
         return ResponseEntity.ok(rolePermissionService.getRolePermission(token, id));
     }
 
@@ -67,7 +68,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the role-permission has been deleted.
      */
     @DeleteMapping(path = "/delete/{id}")
-    public ResponseEntity<Object> deleteRolePermission(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteRolePermission(@RequestHeader("Authorization") String token, @PathVariable Integer id) {
         rolePermissionService.deleteRolePermission(token, id);
         return ResponseEntity.noContent().build();
     }
@@ -80,7 +81,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the role-permission has been added to the system.
      */
     @PostMapping(path = "/add")
-    public ResponseEntity<Object> addRolePermission(@RequestHeader("Authorization") String token, @RequestBody RolePermissionDTO rolePermission) {
+    public ResponseEntity<Void> addRolePermission(@RequestHeader("Authorization") String token, @RequestBody RolePermissionDTO rolePermission) {
         rolePermissionService.addRolePermission(token, rolePermission);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -93,7 +94,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the information of the role-permission has been updated.
      */
     @PutMapping(path = "/update-role-permission")
-    public ResponseEntity<Object> updateRolePermission(@RequestHeader("Authorization") String token, @RequestBody RolePermissionDTO rolePermission) {
+    public ResponseEntity<Void> updateRolePermission(@RequestHeader("Authorization") String token, @RequestBody RolePermissionDTO rolePermission) {
         rolePermissionService.updateRolePermission(token, rolePermission);
         return ResponseEntity.noContent().build();
     }
@@ -106,7 +107,7 @@ public class RolePermissionController {
      * @return A response entity containing the role-permissions of the role.
      */
     @GetMapping(path = "/get-by-role/{roleId}")
-    public ResponseEntity<Object> getRolePermissionsByRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
+    public ResponseEntity<List<PermissionDTO>> getRolePermissionsByRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
         return ResponseEntity.ok(rolePermissionService.getPermissionsByRole(token, roleId));
     }
 
@@ -118,30 +119,28 @@ public class RolePermissionController {
      * @return A response entity containing the role-permissions of the permission.
      */
     @GetMapping(path = "/get-by-permission/{permissionId}")
-    public ResponseEntity<Object> getRolePermissionsByPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
+    public ResponseEntity<List<RoleDTO>> getRolePermissionsByPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
         return ResponseEntity.ok(rolePermissionService.getRolesByPermission(token, permissionId));
     }
 
     /**
      * This endpoint is used to get all the roles in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of roles in the system.
      */
     @GetMapping(path = "get-roles")
-    public ResponseEntity<Object> getRoles(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getRoles(token));
+    public ResponseEntity<List<RoleDTO>> getRoles() {
+        return ResponseEntity.ok(rolePermissionService.getRoles());
     }
 
     /**
      * This endpoint is used to get all the permissions in the system.
      *
-     * @param token The token of the user making the request.
      * @return A response entity containing the list of permissions in the system.
      */
     @GetMapping(path = "get-permissions")
-    public ResponseEntity<Object> getPermissions(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(rolePermissionService.getPermissions(token));
+    public ResponseEntity<List<PermissionDTO>> getPermissions() {
+        return ResponseEntity.ok(rolePermissionService.getPermissions());
     }
 
     /**
@@ -152,7 +151,7 @@ public class RolePermissionController {
      * @return A response entity containing the information of the role.
      */
     @GetMapping(path = "/get-role/{roleId}")
-    public ResponseEntity<Object> getRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
+    public ResponseEntity<RoleDTO> getRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
         return ResponseEntity.ok(rolePermissionService.getRole(token, roleId));
     }
 
@@ -164,7 +163,7 @@ public class RolePermissionController {
      * @return A response entity containing the information of the permission.
      */
     @GetMapping(path = "/get-permission/{permissionId}")
-    public ResponseEntity<Object> getPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
+    public ResponseEntity<PermissionDTO> getPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
         return ResponseEntity.ok(rolePermissionService.getPermission(token, permissionId));
     }
 
@@ -177,7 +176,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the role has been deleted.
      */
     @DeleteMapping(path = "/delete-role/{roleId}")
-    public ResponseEntity<Object> deleteRolePermissionsByRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
+    public ResponseEntity<Void> deleteRolePermissionsByRole(@RequestHeader("Authorization") String token, @PathVariable Integer roleId) {
         rolePermissionService.deleteRole(token, roleId);
         return ResponseEntity.noContent().build();
     }
@@ -191,7 +190,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the permission has been deleted.
      */
     @DeleteMapping(path = "/delete-permission/{permissionId}")
-    public ResponseEntity<Object> deleteRolePermissionsByPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
+    public ResponseEntity<Void> deleteRolePermissionsByPermission(@RequestHeader("Authorization") String token, @PathVariable Integer permissionId) {
         rolePermissionService.deletePermission(token, permissionId);
         return ResponseEntity.noContent().build();
     }
@@ -204,7 +203,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the role has been added to the system.
      */
     @PostMapping(path = "/add-role")
-    public ResponseEntity<Object> addRole(@RequestHeader("Authorization") String token, @RequestBody RoleDTO role) {
+    public ResponseEntity<Void> addRole(@RequestHeader("Authorization") String token, @RequestBody RoleDTO role) {
         rolePermissionService.addRole(token, role);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -217,7 +216,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the permission has been added to the system.
      */
     @PostMapping(path = "/add-permission")
-    public ResponseEntity<Object> addPermission(@RequestHeader("Authorization") String token, @RequestBody PermissionDTO permission) {
+    public ResponseEntity<Void> addPermission(@RequestHeader("Authorization") String token, @RequestBody PermissionDTO permission) {
         rolePermissionService.addPermission(token, permission);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -230,7 +229,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the information of the role has been updated.
      */
     @PutMapping(path = "/update-role")
-    public ResponseEntity<Object> updateRole(@RequestHeader("Authorization") String token, @RequestBody RoleDTO role) {
+    public ResponseEntity<Void> updateRole(@RequestHeader("Authorization") String token, @RequestBody RoleDTO role) {
         rolePermissionService.updateRole(token, role);
         return ResponseEntity.noContent().build();
     }
@@ -243,7 +242,7 @@ public class RolePermissionController {
      * @return A response entity indicating that the information of the permission has been updated.
      */
     @PutMapping(path = "/update-permission")
-    public ResponseEntity<Object> updatePermission(@RequestHeader("Authorization") String token, @RequestBody PermissionDTO permission) {
+    public ResponseEntity<Void> updatePermission(@RequestHeader("Authorization") String token, @RequestBody PermissionDTO permission) {
         rolePermissionService.updatePermission(token, permission);
         return ResponseEntity.noContent().build();
     }
