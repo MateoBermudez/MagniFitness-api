@@ -73,19 +73,6 @@ public class LogEventController {
     }
 
     /**
-     * Save the log with the given JSON.
-     * @param logEventJSON The JSON of the log.
-     * @return The response entity.
-     * @throws Exception Throws exception because of the JSON reading class if the JSON is not valid.
-     */
-    // Throws exception because of the JSON reading class
-    @PostMapping("/save-log")
-    public ResponseEntity<Void> saveLog(@RequestBody String logEventJSON) throws Exception {
-        logEventService.saveLogEvent(logEventJSON);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    /**
      * Delete the log with the given id.
      * @param id The id of the log.
      * @return The response entity meaning the log is deleted.

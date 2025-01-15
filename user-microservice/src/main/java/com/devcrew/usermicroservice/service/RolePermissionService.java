@@ -115,12 +115,14 @@ public class RolePermissionService {
                     () -> new BadRequestException("RolePermission not found")
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "Permission", "role_permission", user.getId(),
                     "User with " + username + " username has deleted a role permission.",
                     JsonBuilderUtils.jsonBuilder(rolePermission),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             rolePermissionRepository.deleteById(id);
@@ -149,12 +151,14 @@ public class RolePermissionService {
 
             RolePermission rolePermissionEntity = RolePermissionMapper.toEntity(rolePermission);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Create", "Permission", "role_permission", user.getId(),
                     "User with " + username + " username has added a new role permission.",
                     "{}",
-                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity)
+                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             rolePermissionRepository.save(rolePermissionEntity);
@@ -189,12 +193,14 @@ public class RolePermissionService {
                 throw new BadRequestException("Data is the same");
             }
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "Permission", "role_permission", user.getId(),
                     "User with " + username + " username has updated a role permission.",
                     JsonBuilderUtils.jsonBuilder(roleToUpdate),
-                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity)
+                    JsonBuilderUtils.jsonBuilder(rolePermissionEntity),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             rolePermissionRepository.save(rolePermissionEntity);
@@ -317,20 +323,24 @@ public class RolePermissionService {
                     () -> new BadRequestException("Role not found")
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "Role", "role", user.getId(),
                     "User with " + username + " username has deleted a role.",
                     JsonBuilderUtils.jsonBuilder(role),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "Role", "role_permission", user.getId(),
                     "User with " + username + " username has deleted the connections between the role and the permission.",
                     JsonBuilderUtils.jsonBuilder(role),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             rolePermissionRepository.deleteByRole(role.getId());
@@ -365,20 +375,24 @@ public class RolePermissionService {
                     () -> new BadRequestException("Permission not found")
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "Permission", "permission", user.getId(),
                     "User with " + username + " username has deleted a permission.",
                     JsonBuilderUtils.jsonBuilder(permission),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "Permission", "role_permission", user.getId(),
                     "User with " + username + " username has deleted the connections between the role and the permission.",
                     JsonBuilderUtils.jsonBuilder(permission),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             rolePermissionRepository.deleteByPermission(permission.getId());
@@ -408,12 +422,14 @@ public class RolePermissionService {
 
             Role roleToAdd = RoleMapper.toEntity(role);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Create", "Role", "role", user.getId(),
                     "User with " + username + " username has added a new role.",
                     "{}",
-                    JsonBuilderUtils.jsonBuilder(roleToAdd)
+                    JsonBuilderUtils.jsonBuilder(roleToAdd),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             roleRepository.save(roleToAdd);
@@ -442,12 +458,14 @@ public class RolePermissionService {
 
             Permission permissionToAdd = PermissionMapper.toEntity(permission);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Create", "Permission", "permission", user.getId(),
                     "User with " + username + " username has added a new permission.",
                     "{}",
-                    JsonBuilderUtils.jsonBuilder(permissionToAdd)
+                    JsonBuilderUtils.jsonBuilder(permissionToAdd),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             permissionRepository.save(permissionToAdd);
@@ -487,12 +505,14 @@ public class RolePermissionService {
             }
             //Cascade should propagate to RolePermission
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "Role", "role", user.getId(),
                     "User with " + username + " username has updated a role.",
                     JsonBuilderUtils.jsonBuilder(roleToUpdate),
-                    JsonBuilderUtils.jsonBuilder(roleEntity)
+                    JsonBuilderUtils.jsonBuilder(roleEntity),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             roleRepository.save(roleEntity);
@@ -532,12 +552,14 @@ public class RolePermissionService {
             }
             //Cascade should propagate to RolePermission
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "Permission", "permission", user.getId(),
                     "User with " + username + " username has updated a permission.",
                     JsonBuilderUtils.jsonBuilder(permissionToUpdate),
-                    JsonBuilderUtils.jsonBuilder(permissionEntity)
+                    JsonBuilderUtils.jsonBuilder(permissionEntity),
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             permissionRepository.save(permissionEntity);

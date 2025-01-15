@@ -1,11 +1,7 @@
 package com.devcrew.logmicroservice.config;
 
-import com.devcrew.logmicroservice.model.Action;
-import com.devcrew.logmicroservice.model.AppEntity;
-import com.devcrew.logmicroservice.model.AppModule;
-import com.devcrew.logmicroservice.repository.ActionRepository;
-import com.devcrew.logmicroservice.repository.AppEntityRepository;
-import com.devcrew.logmicroservice.repository.ModuleRepository;
+import com.devcrew.logmicroservice.model.*;
+import com.devcrew.logmicroservice.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

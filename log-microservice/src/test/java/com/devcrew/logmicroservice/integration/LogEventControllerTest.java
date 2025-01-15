@@ -1,13 +1,12 @@
 package com.devcrew.logmicroservice.integration;
 
-import com.devcrew.logmicroservice.model.Action;
-import com.devcrew.logmicroservice.model.AppEntity;
-import com.devcrew.logmicroservice.model.AppModule;
-import com.devcrew.logmicroservice.model.LogEvent;
+import com.devcrew.logmicroservice.model.*;
 import com.devcrew.logmicroservice.repository.LogEventRepository;
+import com.devcrew.logmicroservice.repository.LogUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,12 +37,25 @@ public class LogEventControllerTest {
     private LogEventRepository logEventRepository;
 
     /**
+     * This is the internal API key used to authenticate requests coming from the API Gateway.
+     */
+    @Value("${internal.api.key}")
+    private String internalApiKey;
+
+    /**
+     * The LogUserRepository object is used to access the LogUser table in the database.
+     */
+    @Autowired
+    private LogUserRepository logUserRepository;
+
+    /**
      * This method is used to set up the test environment before each test.
      */
     @BeforeEach
     public void setUp() {
         logEventRepository.deleteAll();
         LogEvent logEvent = createLogEvent();
+        logUserRepository.save(logEvent.getUserId());
         logEventRepository.save(logEvent);
     }
 
@@ -56,7 +68,7 @@ public class LogEventControllerTest {
                 new Action(1, "Create"),
                 new AppModule(1, "User"),
                 new AppEntity(1, "action"),
-                1,
+                new LogUser(1, "user", "hola@mail.com"),
                 "user",
                 "{}",
                 "{}"
@@ -71,6 +83,7 @@ public class LogEventControllerTest {
     @Test
     public void testGetLogs() throws Exception {
         mockMvc.perform(get("/log/get-logs")
+                        .header("X-API-Key", internalApiKey)
                         .contentType(jakarta.ws.rs.core.MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(jakarta.ws.rs.core.MediaType.APPLICATION_JSON))

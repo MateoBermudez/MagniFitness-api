@@ -16,7 +16,7 @@ public class LogEventFilter {
     ActionDTO action;
     AppModuleDTO module;
     AppEntityDTO entity;
-    Integer userId;
+    LogUserDTO userId;
     String startDate;
     String endDate;
 }
