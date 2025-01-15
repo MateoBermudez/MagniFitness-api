@@ -36,6 +36,21 @@ services:
       - api-gateway
     env_file:
       - ./user-microservice/.env
+  product-microservice:
+    build:
+      context: ./product-microservice
+      dockerfile: Dockerfile
+    container_name: product-microservice
+    ports:
+      - "8082:8082"
+    networks:
+      - bridge
+    depends_on:
+      - eureka-server
+      - api-gateway
+      - user-microservice
+    env_file:
+      - ./product-microservice/.env
   log-microservice:
     build:
       context: ./log-microservice
@@ -49,6 +64,7 @@ services:
         - eureka-server
         - api-gateway
         - user-microservice
+        - product-microservice
     env_file:
         - ./log-microservice/.env
 

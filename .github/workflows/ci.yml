@@ -44,6 +44,12 @@ jobs:
               - DB_URL
               - DB_USERNAME
               - DB_PASSWORD
+          - name: product-microservice
+            envs:
+              - DB_URL
+              - DB_USERNAME
+              - DB_PASSWORD
+              - INTERNAL_API_KEY
 
     steps:
       - name: Checkout code
