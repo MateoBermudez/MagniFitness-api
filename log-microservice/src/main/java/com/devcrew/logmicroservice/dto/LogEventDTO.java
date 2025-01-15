@@ -19,6 +19,6 @@ public class LogEventDTO {
     private ActionDTO action;
     private AppEntityDTO appEntity;
     private AppModuleDTO appModule;
-    private Integer user_identifier;
+    private LogUserDTO user_identifier;
     private LocalDateTime creationDate;
 }

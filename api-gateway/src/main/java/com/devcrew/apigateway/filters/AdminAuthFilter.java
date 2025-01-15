@@ -77,6 +77,7 @@ public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilte
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", jwt);
+        headers.set("X-API-Key", adminAuthConfig.getApiKey());
         HttpEntity<String> entity = new HttpEntity<>(headers);
         try {
             ResponseEntity<Boolean> response = restTemplate.exchange(

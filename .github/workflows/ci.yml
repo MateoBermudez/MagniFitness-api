@@ -39,6 +39,8 @@ jobs:
               - EMAIL_USERNAME
               - EMAIL_PASSWORD
               - ENCRYPTION_SECRET
+              - RABBITMQ_USERNAME
+              - RABBITMQ_PASSWORD
           - name: log-microservice
             envs:
               - DB_URL
@@ -92,6 +94,8 @@ jobs:
           EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
         run: |
           cd ${{ matrix.microservice.name }}
           ./mvnw clean install -DskipTests
@@ -111,6 +115,8 @@ jobs:
           EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
         run: |
           cd ${{ matrix.microservice.name }}
           ./mvnw test

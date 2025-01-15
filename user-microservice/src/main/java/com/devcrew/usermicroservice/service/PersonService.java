@@ -108,12 +108,14 @@ public class PersonService {
             person.getAppUser().setId(personFromToken.getAppUser().getId());
             person.getAppUser().setAppPerson(person);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_person", person.getId(),
                     "Person with:" + person.getId() + " ID has been updated successfully.",
                     jsonBefore,
-                    JsonBuilderUtils.jsonBuilder(person)
+                    JsonBuilderUtils.jsonBuilder(person),
+                    person.getAppUser().getUsername(),
+                    person.getAppUser().getEmail()
             );
 
             personRepository.save(person);
@@ -134,12 +136,14 @@ public class PersonService {
         try {
             AppPerson person = PersonMapper.toEntity(personDTO);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Create", "User", "app_person", person.getId(),
                     "Person with:" + person.getId() + " ID has been created successfully.",
                     "{}",
-                    JsonBuilderUtils.jsonBuilder(person)
+                    JsonBuilderUtils.jsonBuilder(person),
+                    person.getAppUser().getUsername(),
+                    person.getAppUser().getEmail()
             );
 
             personRepository.save(person);
@@ -161,12 +165,14 @@ public class PersonService {
                     () -> new UserDoesNotExistException("User does not exist")
             );
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "User", "app_person", id,
                     "Person with:" + id + " ID has been deleted successfully.",
                     JsonBuilderUtils.jsonBuilder(person),
-                    "{}"
+                    "{}",
+                    person.getAppUser().getUsername(),
+                    person.getAppUser().getEmail()
             );
 
             personRepository.delete(person);

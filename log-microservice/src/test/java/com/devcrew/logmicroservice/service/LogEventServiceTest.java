@@ -1,11 +1,9 @@
 package com.devcrew.logmicroservice.service;
 
 import com.devcrew.logmicroservice.dto.LogEventDTO;
-import com.devcrew.logmicroservice.model.Action;
-import com.devcrew.logmicroservice.model.AppEntity;
-import com.devcrew.logmicroservice.model.AppModule;
-import com.devcrew.logmicroservice.model.LogEvent;
+import com.devcrew.logmicroservice.model.*;
 import com.devcrew.logmicroservice.repository.LogEventRepository;
+import com.devcrew.logmicroservice.repository.LogUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +32,20 @@ public class LogEventServiceTest {
     private final LogEventService logEventService;
 
     /**
+     * The LogUserRepository instance to access the LogUser table in the database.
+     */
+    private final LogUserRepository logUserRepository;
+
+    /**
      * This is the constructor of the LogEventServiceTest class.
      * @param logEventRepository - the LogEventRepository instance
      * @param logEventService - the LogEventService instance
      */
     @Autowired
-    public LogEventServiceTest(LogEventRepository logEventRepository, LogEventService logEventService) {
+    public LogEventServiceTest(LogEventRepository logEventRepository, LogEventService logEventService, LogUserRepository logUserRepository) {
         this.logEventRepository = logEventRepository;
         this.logEventService = logEventService;
+        this.logUserRepository = logUserRepository;
     }
 
     /**
@@ -51,6 +55,7 @@ public class LogEventServiceTest {
     public void setUp() {
         logEventRepository.deleteAll();
         LogEvent logEvent = createLogEvent();
+        logUserRepository.save(logEvent.getUserId());
         logEventRepository.save(logEvent);
     }
 
@@ -63,7 +68,7 @@ public class LogEventServiceTest {
                 new Action(1, "Create"),
                 new AppModule(1, "User"),
                 new AppEntity(1, "action"),
-                1,
+                new LogUser(1, "user", "hola@mail.com"),
                 "user",
                 "{}",
                 "{}"
@@ -85,7 +90,6 @@ public class LogEventServiceTest {
         assertEquals("Create", logEventDTO.getAction().getName_action());
         assertEquals("User", logEventDTO.getAppModule().getName_module());
         assertEquals("ACTION", logEventDTO.getAppEntity().getName_entity());
-        assertEquals(1, logEventDTO.getUser_identifier());
         assertEquals("user", logEventDTO.getDescription());
         assertEquals("{}", logEventDTO.getJsonBefore());
         assertEquals("{}", logEventDTO.getJsonAfter());

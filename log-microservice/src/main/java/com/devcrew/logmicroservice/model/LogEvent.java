@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -26,7 +28,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-public class LogEvent {
+public class LogEvent implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * The id of the log event.
@@ -70,10 +75,10 @@ public class LogEvent {
     /**
      * The user that performed the action.
      */
-    //It comes from a RestTemplate call to the user microservice
-    @Column(name = "user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     @NotNull
-    private Integer userId;
+    private LogUser userId;
 
     /**
      * The date and time when the log was created.
@@ -93,21 +98,21 @@ public class LogEvent {
     /**
      * The state of the entity before the action was performed.
      */
-    @Column(name = "jsonBefore")
+    @Column(name = "json_Before")
     @NotNull
     private String jsonBefore;
 
     /**
      * The state of the entity after the action was performed.
      */
-    @Column(name = "jsonAfter")
+    @Column(name = "json_After")
     @NotNull
     private String jsonAfter;
 
     public LogEvent(Action actionId,
                     AppModule moduleId,
                     AppEntity entityId,
-                    Integer userId,
+                    LogUser userId,
                     String description,
                     String jsonBefore,
                     String jsonAfter) {

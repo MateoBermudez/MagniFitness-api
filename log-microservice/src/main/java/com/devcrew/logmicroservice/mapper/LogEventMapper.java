@@ -1,7 +1,8 @@
 package com.devcrew.logmicroservice.mapper;
 
 import com.devcrew.logmicroservice.dto.LogEventDTO;
-import com.devcrew.logmicroservice.model.LogEvent;
+import com.devcrew.logmicroservice.dto.LogMessage;
+import com.devcrew.logmicroservice.model.*;
 
 /**
  * This class is used to map the LogEvent entity to the LogEventDTO and vice versa.
@@ -22,7 +23,7 @@ public class LogEventMapper {
                 ActionMapper.toDTO(logEvent.getActionId()),
                 AppEntityMapper.toDTO(logEvent.getEntityId()),
                 AppModuleMapper.toDTO(logEvent.getModuleId()),
-                logEvent.getUserId(),
+                LogUserMapper.toLogUserDTO(logEvent.getUserId()),
                 logEvent.getCreationDate()
         );
     }
@@ -31,23 +32,36 @@ public class LogEventMapper {
      * This method is used to map the LogEventDTO to the LogEvent entity.
      * It currently has no use in the project.
      * Because the LogEvent is being created by a JSON object.
-     * @param logEventDTO The LogEventDTO.
+     * @param logMessage The LogMessage object. Received from RabbitMQ.
      * @return The LogEvent entity.
      */
-    public static LogEvent toEntity(LogEventDTO logEventDTO) {
+    public static LogEvent toEntity(LogMessage logMessage) {
         LogEvent logEvent = new LogEvent();
 
-        if (logEventDTO.getIdentifier() != null) {
-            logEvent.setId(logEventDTO.getIdentifier());
-        }
+        Action action = new Action();
+        action.setId(logMessage.getActionId());
+        action.setName(logMessage.getAction());
+        logEvent.setActionId(action);
 
-        logEvent.setDescription(logEventDTO.getDescription());
-        logEvent.setJsonBefore(logEventDTO.getJsonBefore());
-        logEvent.setJsonAfter(logEventDTO.getJsonAfter());
-        logEvent.setActionId(ActionMapper.toEntity(logEventDTO.getAction()));
-        logEvent.setEntityId(AppEntityMapper.toEntity(logEventDTO.getAppEntity()));
-        logEvent.setModuleId(AppModuleMapper.toEntity(logEventDTO.getAppModule()));
-        logEvent.setUserId(logEventDTO.getUser_identifier());
+        AppModule module = new AppModule();
+        module.setId(logMessage.getModuleId());
+        module.setName(logMessage.getModule());
+        logEvent.setModuleId(module);
+
+        AppEntity entity = new AppEntity();
+        entity.setId(logMessage.getEntityId());
+        entity.setName(logMessage.getEntity());
+        logEvent.setEntityId(entity);
+
+        LogUser user = new LogUser();
+        user.setId(logMessage.getUserId());
+        user.setUsername(logMessage.getUsername());
+        user.setEmail(logMessage.getEmail());
+        logEvent.setUserId(user);
+
+        logEvent.setJsonBefore(logMessage.getJsonBefore());
+        logEvent.setJsonAfter(logMessage.getJsonAfter());
+        logEvent.setDescription(logMessage.getDescription());
 
         return logEvent;
     }

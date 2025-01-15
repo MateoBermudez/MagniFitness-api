@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -61,6 +62,13 @@ public class AuthIntegrationTest {
         personRepository.deleteAll();
         userRepository.deleteAll();
     }
+
+    /**
+     * Internal API key for accessing the endpoints.
+     */
+    @Value("${internal.api.key}")
+    private String apiKey;
+
     /**
      * Test for the login endpoint.
      * This test verifies that a valid login request returns a token.
@@ -79,6 +87,7 @@ public class AuthIntegrationTest {
                 }
                 """;
         MvcResult result = mockMvc.perform(post("/auth/login")
+                        .header("X-API-Key", apiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonLogin))
                 .andExpect(status().isOk())
@@ -112,6 +121,7 @@ public class AuthIntegrationTest {
                 }
                 """;
         MvcResult result = mockMvc.perform(post("/auth/register")
+                        .header("X-API-Key", apiKey)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRegister))
                 .andExpect(status().isOk())

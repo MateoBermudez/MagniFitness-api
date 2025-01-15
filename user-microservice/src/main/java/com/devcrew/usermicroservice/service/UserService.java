@@ -117,12 +117,14 @@ public class UserService {
         try {
             AppUser user = validatePermissions(username, token, "DELETE");
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Delete", "User", "app_user", user.getId(),
                     "User with " + username + " username has been deleted successfully.",
                     JsonBuilderUtils.jsonBuilder(user),
-                    "{}"
+                    "{}",
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             userRepository.deleteById(user.getId());
@@ -157,12 +159,14 @@ public class UserService {
 
             String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + username + " username email has been changed successfully.",
                     jsonBefore,
-                    jsonAfter
+                    jsonAfter,
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             userRepository.save(user);
@@ -199,12 +203,14 @@ public class UserService {
 
             String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + username + " username has been changed successfully to " + newUsername + " username.",
                     jsonBefore,
-                    jsonAfter
+                    jsonAfter,
+                    user.getUsername(),
+                    user.getEmail()
             );
 
             userRepository.save(user);
@@ -235,12 +241,14 @@ public class UserService {
 
             userRepository.save(user);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + username + " username password has been changed successfully.",
                     jsonBefore,
-                    jsonAfter
+                    jsonAfter,
+                    user.getUsername(),
+                    user.getEmail()
             );
 
         } catch (Exception ex) {
@@ -274,12 +282,14 @@ public class UserService {
 
             userRepository.save(user);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + username + " username role has been changed successfully.",
                     jsonBefore,
-                    jsonAfter
+                    jsonAfter,
+                    user.getUsername(),
+                    user.getEmail()
             );
 
         } catch (UserDoesNotExistException | BadRequestException ex) {
@@ -308,12 +318,14 @@ public class UserService {
 
             String jsonAfter = JsonBuilderUtils.jsonBuilder(user);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + username + " username has been logged out successfully.",
                     jsonBefore,
-                    jsonAfter
+                    jsonAfter,
+                    user.getUsername(),
+                    user.getEmail()
             );
 
         } catch (Exception ex) {
@@ -378,12 +390,14 @@ public class UserService {
         try {
             String jsonBefore = JsonBuilderUtils.jsonBuilder(user);
             user.setLoggedIn(true);
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + user.getUsername() + " username has logged in successfully using OAuth2.",
                     jsonBefore,
-                    JsonBuilderUtils.jsonBuilder(user)
+                    JsonBuilderUtils.jsonBuilder(user),
+                    user.getUsername(),
+                    user.getEmail()
             );
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -422,12 +436,14 @@ public class UserService {
      */
     private void sendLogForCreatedOAuth2User(AppUser user) {
         try {
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Create", "User", "app_user", user.getId(),
                     "User with " + user.getUsername() + " username has been created successfully using OAuth2.",
                     JsonBuilderUtils.jsonBuilder("{}"),
-                    JsonBuilderUtils.jsonBuilder(user)
+                    JsonBuilderUtils.jsonBuilder(user),
+                    user.getUsername(),
+                    user.getEmail()
             );
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -475,12 +491,14 @@ public class UserService {
 
             user.setAuthenticated(faStatus);
 
-            logSenderService.sendLog(
+            logSenderService.mapAndSendLog(
                     null, null, null,
                     "Update", "User", "app_user", user.getId(),
                     "User with " + user.getUsername() + " username has been authenticated successfully.",
                     jsonBefore,
-                    JsonBuilderUtils.jsonBuilder(user)
+                    JsonBuilderUtils.jsonBuilder(user),
+                    user.getUsername(),
+                    user.getEmail()
             );
         } catch (Exception e) {
             throw new RuntimeException(e);

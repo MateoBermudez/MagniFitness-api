@@ -43,7 +43,14 @@ public class SecurityConfig {
      * @throws Exception if an error occurs while creating the SecurityFilterChain
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, UserService userService, JwtService jwtService, TwoFactorAuthFilter twoFactorAuthFilter, AdminFilter adminFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            UserService userService, JwtService jwtService,
+            TwoFactorAuthFilter twoFactorAuthFilter,
+            AdminFilter adminFilter,
+            ApiGatewayFilter apiGatewayFilter)
+            throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authRequest ->
@@ -64,6 +71,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(twoFactorAuthFilter, JwtAuthenticationFilter.class)
                 .addFilterAfter(adminFilter, TwoFactorAuthFilter.class)
+                .addFilterBefore(apiGatewayFilter, JwtAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oAuth2UserService())

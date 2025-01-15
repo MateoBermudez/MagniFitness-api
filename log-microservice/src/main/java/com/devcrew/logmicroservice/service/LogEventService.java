@@ -2,20 +2,11 @@ package com.devcrew.logmicroservice.service;
 
 import com.devcrew.logmicroservice.dto.LogEventDTO;
 import com.devcrew.logmicroservice.dto.LogEventFilter;
+import com.devcrew.logmicroservice.dto.LogMessage;
 import com.devcrew.logmicroservice.dto.PaginatedLogsResponse;
-import com.devcrew.logmicroservice.mapper.ActionMapper;
-import com.devcrew.logmicroservice.mapper.AppEntityMapper;
-import com.devcrew.logmicroservice.mapper.AppModuleMapper;
-import com.devcrew.logmicroservice.mapper.LogEventMapper;
-import com.devcrew.logmicroservice.model.Action;
-import com.devcrew.logmicroservice.model.AppEntity;
-import com.devcrew.logmicroservice.model.AppModule;
-import com.devcrew.logmicroservice.model.LogEvent;
-import com.devcrew.logmicroservice.repository.ActionRepository;
-import com.devcrew.logmicroservice.repository.AppEntityRepository;
-import com.devcrew.logmicroservice.repository.LogEventRepository;
-import com.devcrew.logmicroservice.repository.ModuleRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.devcrew.logmicroservice.mapper.*;
+import com.devcrew.logmicroservice.model.*;
+import com.devcrew.logmicroservice.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -56,18 +47,25 @@ public class LogEventService {
     private final ModuleRepository moduleRepository;
 
     /**
+     * Repository for LogUser entity
+     */
+    private final LogUserRepository logUserRepository;
+
+    /**
      * Constructor for LogEventService, initializes repositories
      * @param logEventRepository Repository for LogEvent entity
      * @param appEntityRepository Repository for AppEntity entity
      * @param actionRepository Repository for Action entity
      * @param moduleRepository Repository for AppModule entity
+     * @param logUserRepository Repository for LogUser entity
      */
     @Autowired
-    public LogEventService(LogEventRepository logEventRepository, AppEntityRepository appEntityRepository, ActionRepository actionRepository, ModuleRepository moduleRepository) {
+    public LogEventService(LogEventRepository logEventRepository, AppEntityRepository appEntityRepository, ActionRepository actionRepository, ModuleRepository moduleRepository, LogUserRepository logUserRepository) {
         this.logEventRepository = logEventRepository;
         this.appEntityRepository = appEntityRepository;
         this.actionRepository = actionRepository;
         this.moduleRepository = moduleRepository;
+        this.logUserRepository = logUserRepository;
     }
 
     /**
@@ -138,20 +136,27 @@ public class LogEventService {
         if (filter.getAction() != null) probe.setActionId(ActionMapper.toEntity(filter.getAction()));
         if (filter.getModule() != null) probe.setModuleId(AppModuleMapper.toEntity(filter.getModule()));
         if (filter.getEntity() != null) probe.setEntityId(AppEntityMapper.toEntity(filter.getEntity()));
-        if (filter.getUserId() != null) probe.setUserId(filter.getUserId());
+        if (filter.getUserId() != null) probe.setUserId(LogUserMapper.toLogUser(filter.getUserId()));
         return probe;
     }
 
     /**
      * Method for saving a log event
-     * @param logEventJSON JSON representation of a log event
-     * @throws Exception if JSON is invalid or entity, module or action is not found
+     * @param logMessage LogMessage object received from RabbitMQ
      */
     @Transactional
-    public void saveLogEvent(String logEventJSON) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        LogEvent logEvent = objectMapper.readValue(logEventJSON, LogEvent.class);
+    public void saveLogEvent(LogMessage logMessage) {
+        LogEvent logEvent = LogEventMapper.toEntity(logMessage);
+        logEvent.setUserId(saveUser(logEvent.getUserId()));
         logEventRepository.save(mapLogEvent(logEvent));
+    }
+
+    @Transactional
+    protected LogUser saveUser(LogUser user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User is required to save log event.");
+        }
+        return logUserRepository.save(user);
     }
 
     /**
