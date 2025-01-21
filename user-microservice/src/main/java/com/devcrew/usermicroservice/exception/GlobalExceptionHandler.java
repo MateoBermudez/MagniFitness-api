@@ -21,7 +21,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException e) {
+    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+    public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
@@ -41,7 +43,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(UserDoesNotExistException.class)
-    public ResponseEntity<Object> handleUserDoesNotExistException(UserDoesNotExistException e) {
+    public ResponseEntity<String> handleUserDoesNotExistException(UserDoesNotExistException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
@@ -51,7 +54,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> handleBadRequestException(BadRequestException e) {
+    public ResponseEntity<String> handleBadRequestException(BadRequestException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
@@ -61,7 +65,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<Object> handleCustomException(CustomException e) {
+    public ResponseEntity<String> handleCustomException(CustomException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
@@ -71,7 +76,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception e) {
+    public ResponseEntity<String> handleException(Exception e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
@@ -81,7 +87,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> handleIOException(IOException e) {
+    public ResponseEntity<String> handleIOException(IOException e) {
+        System.err.println(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
@@ -91,7 +98,8 @@ public class GlobalExceptionHandler {
      * @return the response entity
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Object> handleBadCredentialsException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    public ResponseEntity<String> handleBadCredentialsException(Exception e) {
+        System.err.println(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

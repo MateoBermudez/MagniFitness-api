@@ -1,4 +1,4 @@
-package com.devcrew.usermicroservice.config;
+package com.devcrew.productmicroservice.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -62,5 +62,4 @@ public class RabbitConfig {
         factory.setErrorHandler(t -> System.err.println("Error in listener: " + t.getCause().getMessage()));
         return factory;
     }
-
 }

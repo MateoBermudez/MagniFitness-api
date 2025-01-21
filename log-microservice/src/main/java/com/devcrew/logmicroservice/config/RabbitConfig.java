@@ -59,9 +59,7 @@ public class RabbitConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
-        factory.setErrorHandler(t -> {
-            System.err.println("Error in listener: " + t.getCause().getMessage());
-        });
+        factory.setErrorHandler(t -> System.err.println("Error in listener: " + t.getCause().getMessage()));
         return factory;
     }
 }

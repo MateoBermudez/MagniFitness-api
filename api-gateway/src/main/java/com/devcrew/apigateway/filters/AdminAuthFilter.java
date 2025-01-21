@@ -1,95 +1,98 @@
 package com.devcrew.apigateway.filters;
 
-import com.devcrew.apigateway.config.AdminAuthConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.devcrew.apigateway.config.ServicesConfig;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-/**
- * This filter is responsible for authenticating the admin user.
- * It sends a request to the user microservice to check if the user is an admin.
- * If the user is an admin, the request is forwarded to the target service.
- */
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+
 @Component
 public class AdminAuthFilter extends AbstractGatewayFilterFactory<AdminAuthFilter.Config> {
 
-    private final RestTemplate restTemplate;
+    private final ServicesConfig servicesConfig;
 
-    private final AdminAuthConfig adminAuthConfig;
-
-
-    @Autowired
-    public AdminAuthFilter(RestTemplate restTemplate, AdminAuthConfig adminAuthConfig) {
-        super(Config.class);
-        this.restTemplate = restTemplate;
-        this.adminAuthConfig = adminAuthConfig;
+    public AdminAuthFilter(ServicesConfig servicesConfig) {
+        super(AdminAuthFilter.Config.class);
+        this.servicesConfig = servicesConfig;
     }
 
-    @Configuration
-    public static class Config {
-        // No configuration needed
-    }
-
-    /**
-     * This method is called when the filter is applied.
-     * It checks if the user is an admin by sending a request to the user microservice.
-     * If the user is an admin, the request is forwarded to the target service.
-     * If the user is not an admin, a 403 Forbidden response is returned.
-     * @param config The configuration of the filter
-     * @return The filter
-     */
     @Override
-    public GatewayFilter apply(Config config) {
+    public GatewayFilter apply(AdminAuthFilter.Config config) {
         return (exchange, chain) -> {
+            String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+            if (authHeader == null || authHeader.isEmpty()) {
+                return sendErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "Authorization header is missing");
+            }
+
             try {
-                boolean isAdmin = authenticateAdmin(exchange, config);
-                if (!isAdmin) {
-                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                    exchange.getResponse().getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap("{\"error\": \"Unauthorized access. You are not an admin.\"}".getBytes());
-                    return exchange.getResponse().writeWith(Mono.just(buffer));
+                String jwt = authHeader.substring(7);
+
+                Claims claims = Jwts.parser()
+                        .setSigningKey(getKey())
+                        .parseClaimsJws(jwt)
+                        .getBody();
+
+                if (claims.getExpiration().before(new Date())) {
+                    return sendErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "JWT token is expired");
                 }
-                return chain.filter(exchange);
+
+                String role = claims.get("role", String.class);
+
+                if ("ADMIN".equals(role)) {
+                    return chain.filter(exchange);
+                } else {
+                    return sendErrorResponse(exchange, HttpStatus.FORBIDDEN, "Access denied for role: " + role);
+                }
             } catch (Exception e) {
-                exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                exchange.getResponse().getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(("{\"error\": \"" + e.getMessage() + "\"}").getBytes());
-                return exchange.getResponse().writeWith(Mono.just(buffer));
+                return sendErrorResponse(exchange, HttpStatus.UNAUTHORIZED, "Invalid JWT token");
             }
         };
     }
 
-    /**
-     * This method sends a request to the user microservice to check if the user is an admin.
-     * @param exchange The server web exchange
-     * @param config The configuration of the filter
-     * @return True if the user is an admin, false otherwise
-     */
-    private boolean authenticateAdmin(ServerWebExchange exchange, Config config) {
-        String jwt = exchange.getRequest().getHeaders().getFirst("Authorization");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", jwt);
-        headers.set("X-API-Key", adminAuthConfig.getApiKey());
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+    private Key getKey() {
         try {
-            ResponseEntity<Boolean> response = restTemplate.exchange(
-                    adminAuthConfig.getUrl(),
-                    HttpMethod.GET,
-                    entity,
-                    Boolean.class
-            );
-            return response.getBody() != null && response.getBody();
+            byte[] keyBytes = servicesConfig.getJwtSecretKey().getBytes(StandardCharsets.UTF_8);
+            return new SecretKeySpec(keyBytes, "HmacSHA256");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
-            throw new RuntimeException("Failed to authenticate admin: " + e.getMessage(), e);
+            throw new RuntimeException("Error generating key", e);
         }
+    }
+
+    private Mono<Void> sendErrorResponse(ServerWebExchange exchange, HttpStatus status, String message) {
+        return getErrorMessage(exchange, status, message);
+    }
+
+    protected static Mono<Void> getErrorMessage(ServerWebExchange exchange, HttpStatus status, String message) {
+        exchange.getResponse().setStatusCode(status);
+        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        String errorBody = String.format(
+                "{\"error\": \"%s\", \"status\": %d}",
+                message,
+                status.value()
+        );
+
+        DataBuffer buffer = exchange.getResponse()
+                .bufferFactory()
+                .wrap(errorBody.getBytes(StandardCharsets.UTF_8));
+
+        return exchange.getResponse().writeWith(Mono.just(buffer));
+    }
+
+
+    public static class Config {
     }
 }

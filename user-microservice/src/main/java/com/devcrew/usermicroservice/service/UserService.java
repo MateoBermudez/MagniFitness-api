@@ -532,4 +532,15 @@ public class UserService {
                 () -> new UserDoesNotExistException("User does not exist")
         ));
     }
+
+    /**
+     * Validates if the token holder is a user.
+     * Jwt Validation makes a call to the database to check if the user exists,
+     * so it's not necessary to call the database again.
+     * @param token the JWT token of the user making the request
+     * @return true if the token holder is a user, false otherwise
+     */
+    public boolean validateUser(String token) {
+        return jwtValidation.validateUsernameFromToken(token) != null;
+    }
 }

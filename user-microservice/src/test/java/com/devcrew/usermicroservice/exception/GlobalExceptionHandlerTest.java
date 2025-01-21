@@ -143,7 +143,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void testHandleBadCredentialsException() throws Exception {
         mockMvc.perform(get("/api/test/bad-credentials"))
-                .andExpect(status().isInternalServerError())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().string("Bad credentials"));
     }
 }

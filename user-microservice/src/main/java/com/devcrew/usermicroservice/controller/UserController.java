@@ -150,6 +150,17 @@ public class UserController {
     }
 
     /**
+     * This endpoint is used to validate if a user is an admin.
+     * @param token The token of the user making the request.
+     * @return A response entity indicating if the user is an admin.
+     */
+    @GetMapping(path = "validate-user")
+    public ResponseEntity<Boolean> validateUser(@RequestHeader("Authorization") String token) {
+        boolean isAdmin = userService.validateUser(token);
+        return ResponseEntity.ok(isAdmin);
+    }
+
+    /**
      * This endpoint is used to log out a user.
      * @param token The token of the user making the request.
      * @return A response entity indicating that the user has been logged out.

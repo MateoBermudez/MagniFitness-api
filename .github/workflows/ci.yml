@@ -23,8 +23,8 @@ jobs:
             envs: [] # No secrets needed
           - name: api-gateway
             envs:
-              - ADMIN_AUTH_URL
               - INTERNAL_API_KEY
+              - JWT_SECRET
           - name: user-microservice
             envs:
               - DB_URL
@@ -83,7 +83,6 @@ jobs:
 
       - name: Build microservice
         env:
-          ADMIN_AUTH_URL: ${{ secrets.ADMIN_AUTH_URL }}
           INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -104,7 +103,6 @@ jobs:
 
       - name: Run tests
         env:
-          ADMIN_AUTH_URL: ${{ secrets.ADMIN_AUTH_URL }}
           INTERNAL_API_KEY: ${{ secrets.INTERNAL_API_KEY }}
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
